@@ -29,12 +29,12 @@ export default function ProductCarousel({ title, products, href }: ProductCarous
     <section className="py-14">
       <div className="mx-auto max-w-7xl px-6">
         <div className="mb-6 flex items-end justify-between">
-          <h2 className="font-heading text-2xl font-bold text-panka-brown-500">{title}</h2>
+          <h2 className="font-heading text-3xl font-bold text-panka-brown-500">{title}</h2>
           <div className="flex items-center gap-2">
             {href && (
               <Link
                 href={href}
-                className="mr-2 text-[13px] font-medium text-grey-40 transition-colors hover:text-panka-brown-500"
+                className="mr-2 text-sm font-medium text-grey-40 transition-colors hover:text-panka-brown-500"
               >
                 {t("carousel.viewAll")}
               </Link>

@@ -23,7 +23,7 @@ export default function AnnouncementBar() {
   return (
     <div className="relative bg-panka-brown-500 text-white">
       <div className="mx-auto flex max-w-7xl items-center justify-center px-10 py-2.5">
-        <p className="text-center text-[13px] font-medium tracking-wide transition-opacity duration-500">
+        <p className="text-center text-sm font-medium tracking-wide transition-opacity duration-500">
           {messages[current]}
         </p>
         <button

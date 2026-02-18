@@ -26,10 +26,10 @@ export default function ProductosPage() {
     <>
       <section className="border-b border-grey-10 bg-white pb-10 pt-14">
         <div className="mx-auto max-w-7xl px-6">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-grey-30">
+          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-grey-30">
             {t("productos.tag")}
           </p>
-          <h1 className="mb-6 font-heading text-3xl font-bold text-panka-brown-500 small:text-4xl">
+          <h1 className="mb-6 font-heading text-4xl font-bold text-panka-brown-500 small:text-5xl">
             {t("productos.title")}
           </h1>
           <div className="flex flex-wrap gap-2">
@@ -37,7 +37,7 @@ export default function ProductosPage() {
               <button
                 key={cat.value}
                 onClick={() => setActiveCategory(cat.value)}
-                className={`rounded-xl px-5 py-2.5 text-[13px] font-medium transition-all ${
+                className={`rounded-xl px-5 py-2.5 text-sm font-medium transition-all ${
                   activeCategory === cat.value
                     ? "bg-panka-brown-500 text-white"
                     : "bg-grey-5 text-grey-50 hover:bg-grey-10 hover:text-grey-70"
@@ -59,7 +59,7 @@ export default function ProductosPage() {
           </div>
           {filtered.length === 0 && (
             <div className="py-20 text-center">
-              <p className="text-sm text-grey-40">{t("productos.noResults")}</p>
+              <p className="text-base text-grey-40">{t("productos.noResults")}</p>
             </div>
           )}
         </div>

@@ -41,21 +41,21 @@ export default function Footer() {
         <div className="grid grid-cols-2 gap-10 small:grid-cols-5">
           <div className="col-span-2">
             <Link href="/" className="mb-4 inline-flex items-center gap-2.5">
-              <Image src="/logo.png" alt="Panka" width={32} height={32} className="rounded-circle" />
-              <span className="font-heading text-lg font-bold text-panka-brown-500">Panka</span>
+              <Image src="/logo.png" alt="Panka" width={36} height={36} className="rounded-circle" />
+              <span className="font-heading text-xl font-bold text-panka-brown-500">Panka</span>
             </Link>
-            <p className="mt-3 max-w-xs text-sm leading-relaxed text-grey-40">
+            <p className="mt-3 max-w-xs text-base leading-relaxed text-grey-40">
               {t("footer.desc")}
             </p>
           </div>
 
           {sections.map((section) => (
             <div key={section.title}>
-              <h4 className="mb-4 text-xs font-bold uppercase tracking-widest text-grey-30">{section.title}</h4>
-              <ul className="flex flex-col gap-2.5">
+              <h4 className="mb-4 text-sm font-bold uppercase tracking-widest text-grey-30">{section.title}</h4>
+              <ul className="flex flex-col gap-3">
                 {section.links.map((link) => (
                   <li key={link.label}>
-                    <Link href={link.href} className="text-[13px] text-grey-50 transition-colors hover:text-panka-brown-500">
+                    <Link href={link.href} className="text-sm text-grey-50 transition-colors hover:text-panka-brown-500">
                       {link.label}
                     </Link>
                   </li>
@@ -68,8 +68,8 @@ export default function Footer() {
 
       <div className="border-t border-grey-10">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-          <p className="text-[11px] text-grey-30">&copy; {new Date().getFullYear()} Panka.</p>
-          <div className="flex gap-4 text-[11px] text-grey-30">
+          <p className="text-xs text-grey-30">&copy; {new Date().getFullYear()} Panka.</p>
+          <div className="flex gap-4 text-xs text-grey-30">
             <Link href="#" className="hover:text-grey-50">{t("footer.privacy")}</Link>
             <Link href="#" className="hover:text-grey-50">{t("footer.terms")}</Link>
           </div>

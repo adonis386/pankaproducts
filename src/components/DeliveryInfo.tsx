@@ -46,7 +46,7 @@ export default function DeliveryInfo() {
               <button
                 key={tab.id}
                 onClick={() => setActive(tab.id)}
-                className={`flex flex-1 items-center justify-center gap-2 px-4 py-4 text-[13px] font-medium transition-all ${
+                className={`flex flex-1 items-center justify-center gap-2 px-4 py-4 text-sm font-medium transition-all ${
                   active === tab.id
                     ? "border-b-2 border-panka-brown-500 text-panka-brown-500 bg-panka-cream/30"
                     : "text-grey-40 hover:text-grey-60 hover:bg-grey-5"
@@ -61,14 +61,14 @@ export default function DeliveryInfo() {
           <div className="p-6 small:p-8">
             <div className="grid grid-cols-1 gap-6 small:grid-cols-2">
               <div>
-                <h3 className="mb-2 font-heading text-xl font-bold text-panka-brown-500">
+                <h3 className="mb-2 font-heading text-2xl font-bold text-panka-brown-500">
                   {current.title}
                 </h3>
-                <p className="text-sm leading-relaxed text-grey-50">{current.description}</p>
+                <p className="text-base leading-relaxed text-grey-50">{current.description}</p>
               </div>
               <ul className="flex flex-col gap-3">
                 {current.details.map((detail, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-grey-60">
+                  <li key={i} className="flex items-start gap-3 text-base text-grey-60">
                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-circle bg-panka-green-400" />
                     {detail}
                   </li>

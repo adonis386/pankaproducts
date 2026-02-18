@@ -29,7 +29,7 @@ export default function ProductCard({ product, compact }: ProductCardProps) {
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
         {product.isPopular && (
-          <span className="absolute left-3 top-3 rounded-lg bg-white/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-panka-brown-500 backdrop-blur-sm">
+          <span className="absolute left-3 top-3 rounded-lg bg-white/90 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-panka-brown-500 backdrop-blur-sm">
             {t("product.popular")}
           </span>
         )}
@@ -43,22 +43,22 @@ export default function ProductCard({ product, compact }: ProductCardProps) {
       </div>
 
       <div className={`flex flex-1 flex-col ${compact ? "p-3.5" : "p-4"}`}>
-        <h3 className={`mb-1 font-medium text-grey-80 leading-snug ${compact ? "text-[13px]" : "text-sm"}`}>
+        <h3 className={`mb-1 font-medium text-grey-80 leading-snug ${compact ? "text-sm" : "text-base"}`}>
           {product.name}
         </h3>
         {!compact && (
-          <p className="mb-3 text-xs text-grey-40 leading-relaxed line-clamp-2">
+          <p className="mb-3 text-sm text-grey-40 leading-relaxed line-clamp-2">
             {product.description}
           </p>
         )}
         <div className="mt-auto flex items-center justify-between">
-          <span className={`font-bold text-panka-brown-500 ${compact ? "text-sm" : "text-base"}`}>
+          <span className={`font-bold text-panka-brown-500 ${compact ? "text-base" : "text-lg"}`}>
             ${product.price.toFixed(2)}
           </span>
           {!compact && (
             <button
               onClick={() => addItem(product)}
-              className="rounded-xl bg-grey-5 px-3.5 py-2 text-xs font-semibold text-grey-70 transition-all hover:bg-panka-green-500 hover:text-white"
+              className="rounded-xl bg-grey-5 px-4 py-2.5 text-sm font-semibold text-grey-70 transition-all hover:bg-panka-green-500 hover:text-white"
             >
               {t("product.addToCart")}
             </button>

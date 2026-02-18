@@ -34,10 +34,10 @@ export default function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-40 glass border-b border-grey-20/60">
-        <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
+        <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <Link href="/" className="flex items-center gap-2.5">
-            <Image src="/logo.png" alt="Panka" width={38} height={38} className="rounded-circle" />
-            <span className="font-heading text-xl font-bold text-panka-brown-500">Panka</span>
+            <Image src="/logo.png" alt="Panka" width={42} height={42} className="rounded-circle" />
+            <span className="font-heading text-2xl font-bold text-panka-brown-500">Panka</span>
           </Link>
 
           <ul className="hidden small:flex items-center gap-1">
@@ -45,7 +45,7 @@ export default function Navbar() {
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className="rounded-xl px-4 py-2 text-[13px] font-medium text-grey-60 transition-colors hover:bg-grey-5 hover:text-panka-brown-500"
+                  className="rounded-xl px-5 py-2.5 text-[15px] font-medium text-grey-60 transition-colors hover:bg-grey-5 hover:text-panka-brown-500"
                 >
                   {link.label}
                 </Link>
@@ -57,7 +57,7 @@ export default function Navbar() {
             {/* Language toggle */}
             <button
               onClick={toggleLang}
-              className="flex items-center gap-1 rounded-xl px-2.5 py-2 text-[13px] font-medium text-grey-50 transition-colors hover:bg-grey-5 hover:text-grey-70"
+              className="flex items-center gap-1.5 rounded-xl px-3 py-2.5 text-sm font-medium text-grey-50 transition-colors hover:bg-grey-5 hover:text-grey-70"
               aria-label="Change language"
             >
               <HiOutlineGlobeAlt className="h-4 w-4" />
@@ -69,7 +69,7 @@ export default function Navbar() {
               <div className="relative">
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-[13px] font-medium text-grey-60 transition-colors hover:bg-grey-5"
+                  className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-grey-60 transition-colors hover:bg-grey-5"
                 >
                   <div className="flex h-7 w-7 items-center justify-center rounded-circle bg-panka-green-50 text-xs font-bold text-panka-green-600">
                     {user.displayName?.[0] || user.email?.[0]?.toUpperCase() || "U"}
@@ -99,7 +99,7 @@ export default function Navbar() {
             ) : (
               <button
                 onClick={() => setAuthOpen(true)}
-                className="hidden xsmall:flex items-center gap-1.5 rounded-xl px-3 py-2 text-[13px] font-medium text-grey-60 transition-colors hover:bg-grey-5"
+                className="hidden xsmall:flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-medium text-grey-60 transition-colors hover:bg-grey-5"
               >
                 <HiOutlineUser className="h-4 w-4" />
                 {t("nav.signIn")}
@@ -112,7 +112,7 @@ export default function Navbar() {
               className="relative rounded-xl bg-grey-5 p-2.5 transition-all hover:bg-grey-10"
               aria-label={t("nav.cart")}
             >
-              <HiOutlineShoppingBag className="h-[18px] w-[18px] text-grey-70" />
+              <HiOutlineShoppingBag className="h-5 w-5 text-grey-70" />
               {totalItems > 0 && (
                 <span className="absolute -right-1 -top-1 flex h-[18px] w-[18px] items-center justify-center rounded-circle bg-panka-green-500 text-[9px] font-bold text-white">
                   {totalItems}
