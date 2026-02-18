@@ -1,65 +1,83 @@
+"use client";
+
+import Hero from "@/components/Hero";
+import ProductCarousel from "@/components/ProductCarousel";
+import DeliveryInfo from "@/components/DeliveryInfo";
+import Newsletter from "@/components/Newsletter";
+import { getPopularProducts, getProductsByCategory } from "@/lib/products";
 import Image from "next/image";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Home() {
+  const popular = getPopularProducts();
+  const salados = getProductsByCategory("salados");
+  const dulces = getProductsByCategory("dulces");
+  const { t } = useLanguage();
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <>
+      <Hero />
+
+      <ProductCarousel title={t("home.bestSellers")} products={popular} href="/productos" />
+
+      <DeliveryInfo />
+
+      {/* Banner */}
+      <section className="py-14">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="relative overflow-hidden rounded-2xl bg-panka-brown-500">
+            <div className="grid grid-cols-1 small:grid-cols-2">
+              <div className="relative z-10 flex flex-col justify-center px-8 py-14 small:px-14 small:py-20">
+                <span className="mb-3 text-xs font-semibold uppercase tracking-widest text-panka-brown-200">
+                  {t("home.specials")}
+                </span>
+                <h2 className="mb-3 font-heading text-3xl font-bold text-white small:text-4xl">
+                  {t("home.bannerTitle")}
+                </h2>
+                <p className="mb-6 max-w-sm text-sm leading-relaxed text-panka-brown-200">
+                  {t("home.bannerDesc")}
+                </p>
+                <a href="/productos?cat=especiales" className="w-fit rounded-xl bg-white px-6 py-3 text-sm font-bold text-panka-brown-500 transition-all hover:shadow-panka-md">
+                  {t("home.discover")}
+                </a>
+              </div>
+              <div className="relative min-h-[250px]">
+                <Image src="/hero_3.jpg" alt="Tamales Oaxaqueños" fill className="object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-r from-panka-brown-500 via-panka-brown-500/40 to-transparent small:from-panka-brown-500/60" />
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      <ProductCarousel title={t("home.savory")} products={salados} href="/productos?cat=salados" />
+      <ProductCarousel title={t("home.sweet")} products={dulces} href="/productos?cat=dulces" />
+
+      {/* Reviews */}
+      <section className="py-14">
+        <div className="mx-auto max-w-7xl px-6">
+          <h2 className="mb-8 font-heading text-2xl font-bold text-panka-brown-500">
+            {t("home.reviewsTitle")}
+          </h2>
+          <div className="grid grid-cols-1 gap-4 xsmall:grid-cols-2 small:grid-cols-3">
+            {[
+              { name: "María G.", text: t("home.review1") },
+              { name: "Carlos L.", text: t("home.review2") },
+              { name: "Ana M.", text: t("home.review3") },
+            ].map((review) => (
+              <div key={review.name} className="rounded-2xl border border-grey-10 bg-white p-6 transition-all hover:shadow-panka-sm">
+                <div className="mb-3 flex gap-0.5 text-xs text-amber-400">
+                  {"★★★★★".split("").map((s, i) => <span key={i}>{s}</span>)}
+                </div>
+                <p className="mb-4 text-sm leading-relaxed text-grey-50">&ldquo;{review.text}&rdquo;</p>
+                <p className="text-xs font-semibold text-grey-70">{review.name}</p>
+              </div>
+            ))}
+          </div>
         </div>
-      </main>
-    </div>
+      </section>
+
+      <Newsletter />
+    </>
   );
 }
