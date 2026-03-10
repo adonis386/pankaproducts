@@ -5,11 +5,12 @@ import Link from "next/link";
 import { HiOutlineX, HiPlus, HiMinus, HiOutlineTrash } from "react-icons/hi";
 import { useCart } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { products } from "@/lib/products";
+import { useCatalog } from "@/context/CatalogContext";
 
 export default function CartDrawer() {
   const { items, isOpen, closeCart, removeItem, updateQuantity, addItem, totalPrice, totalItems } = useCart();
   const { t } = useLanguage();
+  const { products } = useCatalog();
 
   if (!isOpen) return null;
 

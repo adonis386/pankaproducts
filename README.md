@@ -16,6 +16,44 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Stripe CLI (login + webhooks)
+
+1. Install Stripe CLI on Windows (PowerShell):
+
+```bash
+winget install --id Stripe.StripeCli --accept-package-agreements --accept-source-agreements
+```
+
+2. Open a NEW terminal and authenticate:
+
+```bash
+stripe login
+```
+
+3. Start webhook forwarding to this app:
+
+```bash
+stripe listen --forward-to localhost:3000/api/stripe/webhook
+```
+
+4. Copy the signing secret shown by Stripe CLI and set it in your env:
+
+```bash
+STRIPE_WEBHOOK_SECRET=whsec_xxx
+```
+
+5. Trigger test events:
+
+```bash
+stripe trigger checkout.session.completed
+stripe trigger payment_intent.succeeded
+```
+
+The app now exposes these Stripe endpoints:
+
+- `POST /api/stripe/embedded-session`
+- `POST /api/stripe/webhook`
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

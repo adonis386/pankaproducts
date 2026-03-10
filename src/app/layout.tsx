@@ -8,6 +8,7 @@ import CartDrawer from "@/components/CartDrawer";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { CatalogProvider } from "@/context/CatalogContext";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -39,11 +40,13 @@ export default function RootLayout({
         <LanguageProvider>
           <AuthProvider>
             <CartProvider>
-              <AnnouncementBar />
-              <Navbar />
-              <CartDrawer />
-              <main className="min-h-screen">{children}</main>
-              <Footer />
+              <CatalogProvider>
+                <AnnouncementBar />
+                <Navbar />
+                <CartDrawer />
+                <main className="min-h-screen">{children}</main>
+                <Footer />
+              </CatalogProvider>
             </CartProvider>
           </AuthProvider>
         </LanguageProvider>

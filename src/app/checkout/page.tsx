@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { CustomerInfo } from "@/lib/types";
 import { HiOutlineCheckCircle, HiArrowLeft } from "react-icons/hi";
+import StripeEmbeddedCheckout from "@/components/StripeEmbeddedCheckout";
 
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
@@ -15,6 +16,8 @@ export default function CheckoutPage() {
   const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [showStripeCheckout, setShowStripeCheckout] = useState(false);
+  const [checkoutError, setCheckoutError] = useState("");
   const [form, setForm] = useState<CustomerInfo>({
     name: user?.displayName || "",
     email: user?.email || "",
@@ -28,12 +31,11 @@ export default function CheckoutPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setCheckoutError("");
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    clearCart();
-    setOrderPlaced(true);
+    setShowStripeCheckout(true);
     setIsSubmitting(false);
   };
 
@@ -119,9 +121,33 @@ export default function CheckoutPage() {
                     <textarea name="notes" value={form.notes} onChange={handleChange} rows={3} className={`${inputClass} resize-none`} placeholder={t("checkout.notesPlaceholder")} />
                   </div>
                 </div>
-                <button type="submit" disabled={isSubmitting} className="mt-6 w-full rounded-xl bg-panka-brown-500 py-4 text-base font-bold text-white transition-all hover:bg-panka-brown-600 hover:shadow-panka-md disabled:opacity-50">
-                  {isSubmitting ? t("checkout.processing") : `${t("checkout.confirmOrder")} — $${totalPrice.toFixed(2)}`}
-                </button>
+                {!showStripeCheckout && (
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="mt-6 w-full rounded-xl bg-panka-brown-500 py-4 text-base font-bold text-white transition-all hover:bg-panka-brown-600 hover:shadow-panka-md disabled:opacity-50"
+                  >
+                    {isSubmitting ? t("checkout.processing") : `${t("checkout.confirmOrder")} — $${totalPrice.toFixed(2)}`}
+                  </button>
+                )}
+                {checkoutError && (
+                  <p className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                    {checkoutError}
+                  </p>
+                )}
+                {showStripeCheckout && (
+                  <div className="mt-6">
+                    <StripeEmbeddedCheckout
+                      items={items}
+                      customer={form}
+                      onComplete={() => {
+                        clearCart();
+                        setOrderPlaced(true);
+                      }}
+                      onError={(message) => setCheckoutError(message)}
+                    />
+                  </div>
+                )}
               </div>
             </form>
 

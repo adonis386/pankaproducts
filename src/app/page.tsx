@@ -4,21 +4,24 @@ import Hero from "@/components/Hero";
 import ProductCarousel from "@/components/ProductCarousel";
 import DeliveryInfo from "@/components/DeliveryInfo";
 import Newsletter from "@/components/Newsletter";
-import { getPopularProducts, getProductsByCategory } from "@/lib/products";
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
+import { useCatalog } from "@/context/CatalogContext";
 
 export default function Home() {
-  const popular = getPopularProducts();
-  const salados = getProductsByCategory("salados");
-  const dulces = getProductsByCategory("dulces");
   const { t } = useLanguage();
+  const { products, loading } = useCatalog();
+  const popular = products.filter((p) => p.isPopular);
+  const salados = products.filter((p) => p.category === "salados");
+  const dulces = products.filter((p) => p.category === "dulces");
 
   return (
     <>
       <Hero />
 
-      <ProductCarousel title={t("home.bestSellers")} products={popular} href="/productos" />
+      {!loading && popular.length > 0 && (
+        <ProductCarousel title={t("home.bestSellers")} products={popular} href="/productos" />
+      )}
 
       <DeliveryInfo />
 
@@ -50,8 +53,12 @@ export default function Home() {
         </div>
       </section>
 
-      <ProductCarousel title={t("home.savory")} products={salados} href="/productos?cat=salados" />
-      <ProductCarousel title={t("home.sweet")} products={dulces} href="/productos?cat=dulces" />
+      {!loading && salados.length > 0 && (
+        <ProductCarousel title={t("home.savory")} products={salados} href="/productos?cat=salados" />
+      )}
+      {!loading && dulces.length > 0 && (
+        <ProductCarousel title={t("home.sweet")} products={dulces} href="/productos?cat=dulces" />
+      )}
 
       {/* Reviews */}
       <section className="py-14">

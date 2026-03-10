@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import ProductCard from "@/components/ProductCard";
-import { products } from "@/lib/products";
 import { Product } from "@/lib/types";
 import { useLanguage } from "@/context/LanguageContext";
+import { useCatalog } from "@/context/CatalogContext";
 
 export default function ProductosPage() {
   const { t } = useLanguage();
+  const { products, loading, error } = useCatalog();
   const [activeCategory, setActiveCategory] = useState<Product["category"] | "todos">("todos");
 
   const categories = [
@@ -52,12 +53,23 @@ export default function ProductosPage() {
 
       <section className="py-10">
         <div className="mx-auto max-w-7xl px-6">
+          {loading && (
+            <div className="py-20 text-center">
+              <div className="mx-auto mb-3 h-6 w-6 animate-ring rounded-circle border-2 border-grey-20 border-t-panka-brown-500" />
+              <p className="text-base text-grey-40">Loading catalog...</p>
+            </div>
+          )}
+          {!!error && !loading && (
+            <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              {error}
+            </div>
+          )}
           <div className="grid grid-cols-1 gap-5 xsmall:grid-cols-2 small:grid-cols-3 medium:grid-cols-4">
             {filtered.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
-          {filtered.length === 0 && (
+          {!loading && filtered.length === 0 && (
             <div className="py-20 text-center">
               <p className="text-base text-grey-40">{t("productos.noResults")}</p>
             </div>
