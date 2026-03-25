@@ -1,27 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ProductCard from "@/components/ProductCard";
 import { Product } from "@/lib/types";
 import { useLanguage } from "@/context/LanguageContext";
 import { useCatalog } from "@/context/CatalogContext";
+import ProductDetailsModal from "@/components/ProductDetailsModal";
+import ProductCardSkeleton from "@/components/ProductCardSkeleton";
 
 export default function ProductosPage() {
   const { t } = useLanguage();
   const { products, loading, error } = useCatalog();
   const [activeCategory, setActiveCategory] = useState<Product["category"] | "todos">("todos");
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  const categories = [
-    { value: "todos" as const, label: t("productos.all") },
-    { value: "salados" as const, label: t("productos.savory") },
-    { value: "dulces" as const, label: t("productos.sweet") },
-    { value: "especiales" as const, label: t("productos.specials") },
+  const hasSalados = products.some((p) => p.category === "salados");
+  const hasDulces = products.some((p) => p.category === "dulces");
+  const hasEspeciales = products.some((p) => p.category === "especiales");
+
+  const availableCategories: Array<{ value: Product["category"]; label: string }> = [];
+  if (hasSalados) availableCategories.push({ value: "salados", label: t("productos.savory") });
+  if (hasDulces) availableCategories.push({ value: "dulces", label: t("productos.sweet") });
+  if (hasEspeciales) availableCategories.push({ value: "especiales", label: t("productos.specials") });
+
+  const categories: Array<{ value: "todos" | Product["category"]; label: string }> = [
+    { value: "todos", label: t("productos.all") },
+    ...availableCategories,
   ];
 
   const filtered =
     activeCategory === "todos"
       ? products
       : products.filter((p) => p.category === activeCategory);
+
+  useEffect(() => {
+    if (loading) return;
+    if (activeCategory === "todos") return;
+    const stillExists = products.some((p) => p.category === activeCategory);
+    if (!stillExists) setActiveCategory("todos");
+  }, [activeCategory, loading, products]);
 
   return (
     <>
@@ -53,22 +70,30 @@ export default function ProductosPage() {
 
       <section className="py-10">
         <div className="mx-auto max-w-7xl px-6">
-          {loading && (
-            <div className="py-20 text-center">
-              <div className="mx-auto mb-3 h-6 w-6 animate-ring rounded-circle border-2 border-grey-20 border-t-panka-brown-500" />
-              <p className="text-base text-grey-40">Loading catalog...</p>
-            </div>
-          )}
           {!!error && !loading && (
             <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
               {error}
             </div>
           )}
-          <div className="grid grid-cols-1 gap-5 xsmall:grid-cols-2 small:grid-cols-3 medium:grid-cols-4">
-            {filtered.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+
+          {loading ? (
+            <div className="grid grid-cols-1 gap-5 xsmall:grid-cols-2 small:grid-cols-3 medium:grid-cols-4">
+              {Array.from({ length: 8 }).map((_, idx) => (
+                <ProductCardSkeleton key={idx} />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-5 xsmall:grid-cols-2 small:grid-cols-3 medium:grid-cols-4">
+              {filtered.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onSelect={(p) => setSelectedProduct(p)}
+                />
+              ))}
+            </div>
+          )}
+
           {!loading && filtered.length === 0 && (
             <div className="py-20 text-center">
               <p className="text-base text-grey-40">{t("productos.noResults")}</p>
@@ -76,6 +101,12 @@ export default function ProductosPage() {
           )}
         </div>
       </section>
+
+      <ProductDetailsModal
+        product={selectedProduct}
+        isOpen={!!selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+      />
     </>
   );
 }

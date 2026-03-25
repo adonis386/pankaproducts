@@ -9,17 +9,25 @@ import { useLanguage } from "@/context/LanguageContext";
 interface ProductCardProps {
   product: Product;
   compact?: boolean;
+  onSelect?: (product: Product) => void;
 }
 
-export default function ProductCard({ product, compact }: ProductCardProps) {
+export default function ProductCard({ product, compact, onSelect }: ProductCardProps) {
   const { addItem } = useCart();
   const { t } = useLanguage();
 
   return (
     <article
+      onClick={() => onSelect?.(product)}
+      onKeyDown={(e) => {
+        if (!onSelect) return;
+        if (e.key === "Enter" || e.key === " ") onSelect(product);
+      }}
+      tabIndex={onSelect ? 0 : -1}
+      role={onSelect ? "button" : undefined}
       className={`group flex flex-col overflow-hidden rounded-2xl bg-white transition-all duration-300 hover:shadow-panka-md ${
         compact ? "min-w-[220px] max-w-[220px]" : ""
-      }`}
+      } ${onSelect ? "cursor-pointer" : ""}`}
     >
       <div className={`relative overflow-hidden ${compact ? "h-44" : "h-56"}`}>
         <Image
@@ -34,7 +42,10 @@ export default function ProductCard({ product, compact }: ProductCardProps) {
           </span>
         )}
         <button
-          onClick={() => addItem(product)}
+          onClick={(e) => {
+            e.stopPropagation();
+            addItem(product);
+          }}
           className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-xl bg-white/90 text-panka-brown-500 shadow-panka-sm backdrop-blur-sm transition-all hover:bg-panka-green-500 hover:text-white hover:shadow-panka-md hover:scale-110 active:scale-95"
           aria-label={t("product.addToCart")}
         >
@@ -57,7 +68,10 @@ export default function ProductCard({ product, compact }: ProductCardProps) {
           </span>
           {!compact && (
             <button
-              onClick={() => addItem(product)}
+              onClick={(e) => {
+                e.stopPropagation();
+                addItem(product);
+              }}
               className="rounded-xl bg-grey-5 px-4 py-2.5 text-sm font-semibold text-grey-70 transition-all hover:bg-panka-green-500 hover:text-white"
             >
               {t("product.addToCart")}

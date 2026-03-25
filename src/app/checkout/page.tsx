@@ -27,6 +27,9 @@ export default function CheckoutPage() {
     notes: "",
   });
 
+  const currentStep = orderPlaced ? 2 : showStripeCheckout ? 1 : 0;
+  const steps = [t("checkout.stepDelivery"), t("checkout.stepPayment"), t("checkout.stepConfirmation")];
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -44,6 +47,23 @@ export default function CheckoutPage() {
       <section className="flex min-h-[70vh] items-center justify-center py-20">
         <div className="mx-auto max-w-sm px-6 text-center animate-scale-in">
           <HiOutlineCheckCircle className="mx-auto mb-5 h-16 w-16 text-panka-green-500" />
+          <div className="mb-6">
+            <ol className="flex items-center justify-center gap-4">
+              {steps.map((label, idx) => (
+                <li key={label} className="flex items-center gap-2">
+                  <span
+                    className={`flex h-10 w-10 items-center justify-center rounded-xl border text-sm font-bold ${
+                      idx <= currentStep
+                        ? "border-panka-green-200 bg-panka-green-50 text-panka-green-600"
+                        : "border-grey-10 bg-white text-grey-40"
+                    }`}
+                  >
+                    {idx < currentStep ? "✓" : idx + 1}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
           <h1 className="mb-2 font-heading text-3xl font-bold text-panka-brown-500">
             {t("checkout.orderConfirmed")}
           </h1>
@@ -86,6 +106,30 @@ export default function CheckoutPage() {
             {t("checkout.continueShopping")}
           </Link>
           <h1 className="font-heading text-3xl font-bold text-panka-brown-500">{t("checkout.title")}</h1>
+          <div className="mt-6">
+            <ol className="flex flex-wrap items-center gap-4">
+              {steps.map((label, idx) => (
+                <li key={label} className="flex items-center gap-2">
+                  <span
+                    className={`flex h-10 w-10 items-center justify-center rounded-xl border text-sm font-bold ${
+                      idx <= currentStep
+                        ? "border-panka-green-200 bg-panka-green-50 text-panka-green-600"
+                        : "border-grey-10 bg-white text-grey-40"
+                    }`}
+                  >
+                    {idx < currentStep ? "✓" : idx + 1}
+                  </span>
+                  <span
+                    className={`text-sm font-semibold ${
+                      idx <= currentStep ? "text-grey-80" : "text-grey-40"
+                    }`}
+                  >
+                    {label}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
         </div>
       </section>
 

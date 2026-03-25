@@ -42,12 +42,18 @@ const translations = {
   // ── Product Card ──
   "product.popular": { en: "Popular", es: "Popular" },
   "product.addToCart": { en: "Add to Cart", es: "Agregar" },
+  "product.ingredients": { en: "Ingredients", es: "Ingredientes" },
+  "product.noIngredients": {
+    en: "No ingredients provided.",
+    es: "No hay ingredientes disponibles.",
+  },
 
   // ── Product Carousel ──
   "carousel.viewAll": { en: "View all", es: "Ver todo" },
 
   // ── Homepage Sections ──
   "home.bestSellers": { en: "Best Sellers", es: "Los Favoritos" },
+  "home.allTamales": { en: "Menu", es: "Menú" },
   "home.savory": { en: "Savory", es: "Salados" },
   "home.sweet": { en: "Sweet", es: "Dulces" },
   "home.specials": { en: "Specials", es: "Especiales" },
@@ -208,6 +214,9 @@ const translations = {
   // ── Checkout Page ──
   "checkout.title": { en: "Checkout", es: "Finalizar Pedido" },
   "checkout.continueShopping": { en: "Continue shopping", es: "Seguir comprando" },
+  "checkout.stepDelivery": { en: "Delivery", es: "Entrega" },
+  "checkout.stepPayment": { en: "Payment", es: "Pago" },
+  "checkout.stepConfirmation": { en: "Confirmed", es: "Confirmado" },
   "checkout.orderConfirmed": { en: "Order Confirmed!", es: "¡Pedido Confirmado!" },
   "checkout.thankYou": { en: "Thank you,", es: "Gracias," },
   "checkout.confirmationEmail": { en: "We'll send a confirmation to", es: "Te enviaremos la confirmación a" },

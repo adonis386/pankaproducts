@@ -7,6 +7,7 @@ import Newsletter from "@/components/Newsletter";
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 import { useCatalog } from "@/context/CatalogContext";
+import ProductCardSkeleton from "@/components/ProductCardSkeleton";
 
 export default function Home() {
   const { t } = useLanguage();
@@ -14,12 +15,40 @@ export default function Home() {
   const popular = products.filter((p) => p.isPopular);
   const salados = products.filter((p) => p.category === "salados");
   const dulces = products.filter((p) => p.category === "dulces");
+  const especiales = products.filter((p) => p.category === "especiales");
+  const categoryCount =
+    (salados.length > 0 ? 1 : 0) + (dulces.length > 0 ? 1 : 0) + (especiales.length > 0 ? 1 : 0);
+
+  const onlyOneCategory = categoryCount === 1;
+
+  const bannerHref = especiales.length > 0 ? "/productos?cat=especiales" : "/productos";
+  const bannerTag = especiales.length > 0 ? t("home.specials") : t("home.bestSellers");
 
   return (
     <>
       <Hero />
 
-      {!loading && popular.length > 0 && (
+      {loading && (
+        <section className="py-10">
+          <div className="mx-auto max-w-7xl px-6">
+            <div className="mb-6 flex items-end justify-between">
+              <div className="h-8 w-56 rounded bg-grey-5 animate-pulse" />
+              <div className="h-9 w-20 rounded-xl bg-grey-5 animate-pulse" />
+            </div>
+            <div className="scrollbar-hide flex gap-4 overflow-x-auto px-2 pb-4">
+              {Array.from({ length: 4 }).map((_, idx) => (
+                <ProductCardSkeleton key={idx} compact />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {!loading && onlyOneCategory && products.length > 0 && (
+        <ProductCarousel title={t("home.allTamales")} products={products} href="/productos" />
+      )}
+
+      {!loading && !onlyOneCategory && popular.length > 0 && (
         <ProductCarousel title={t("home.bestSellers")} products={popular} href="/productos" />
       )}
 
@@ -32,20 +61,17 @@ export default function Home() {
             <div className="grid grid-cols-1 small:grid-cols-2">
               <div className="relative z-10 flex flex-col justify-center px-8 py-14 small:px-14 small:py-20">
                 <span className="mb-3 text-sm font-semibold uppercase tracking-widest text-panka-brown-200">
-                  {t("home.specials")}
+                  {bannerTag}
                 </span>
-                <h2 className="mb-4 font-heading text-4xl font-bold text-white small:text-5xl">
-                  {t("home.bannerTitle")}
-                </h2>
                 <p className="mb-6 max-w-sm text-base leading-relaxed text-panka-brown-200">
                   {t("home.bannerDesc")}
                 </p>
-                <a href="/productos?cat=especiales" className="w-fit rounded-xl bg-white px-7 py-3.5 text-base font-bold text-panka-brown-500 transition-all hover:shadow-panka-md">
+                <a href={bannerHref} className="w-fit rounded-xl bg-white px-7 py-3.5 text-base font-bold text-panka-brown-500 transition-all hover:shadow-panka-md">
                   {t("home.discover")}
                 </a>
               </div>
               <div className="relative min-h-[250px]">
-                <Image src="/hero_3.jpg" alt="Tamales Oaxaqueños" fill className="object-cover" />
+                <Image src="/hero_3.jpg" alt="Tamales" fill className="object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-r from-panka-brown-500 via-panka-brown-500/40 to-transparent small:from-panka-brown-500/60" />
               </div>
             </div>
@@ -53,11 +79,14 @@ export default function Home() {
         </div>
       </section>
 
-      {!loading && salados.length > 0 && (
+      {!loading && !onlyOneCategory && salados.length > 0 && (
         <ProductCarousel title={t("home.savory")} products={salados} href="/productos?cat=salados" />
       )}
-      {!loading && dulces.length > 0 && (
+      {!loading && !onlyOneCategory && dulces.length > 0 && (
         <ProductCarousel title={t("home.sweet")} products={dulces} href="/productos?cat=dulces" />
+      )}
+      {!loading && !onlyOneCategory && especiales.length > 0 && (
+        <ProductCarousel title={t("home.specials")} products={especiales} href="/productos?cat=especiales" />
       )}
 
       {/* Reviews */}

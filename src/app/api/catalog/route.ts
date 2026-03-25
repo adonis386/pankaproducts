@@ -50,6 +50,10 @@ export async function GET() {
         if (!selectedPrice.unit_amount) return null;
 
         const metadata = item.metadata || {};
+        // Only show products created by our seed/scripts (identified via metadata.seedKey).
+        // This prevents unrelated Stripe products from appearing in the storefront.
+        if (!metadata.seedKey) return null;
+
         const stock = Number(metadata.stock || "99");
         const sort = Number(metadata.sort || "9999");
 
