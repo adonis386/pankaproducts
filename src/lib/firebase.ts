@@ -12,7 +12,16 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-const isConfigured = Boolean(firebaseConfig.apiKey);
+// Guard contra placeholders típicos en el .env (para evitar errores tipo "api-key-not-valid").
+const looksLikePlaceholder =
+  !firebaseConfig.apiKey ||
+  firebaseConfig.apiKey.includes("your_") ||
+  firebaseConfig.apiKey.toLowerCase().includes("your_api_key");
+
+const isConfigured =
+  !looksLikePlaceholder &&
+  Boolean(firebaseConfig.authDomain) &&
+  Boolean(firebaseConfig.projectId);
 
 let app: FirebaseApp | null = null;
 let db: Firestore | null = null;
