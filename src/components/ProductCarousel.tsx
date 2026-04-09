@@ -26,28 +26,28 @@ export default function ProductCarousel({ title, products, href }: ProductCarous
   };
 
   return (
-    <section className="py-14">
+    <section className="py-16 bg-surface">
       <div className="mx-auto max-w-7xl px-6">
         <div className="mb-6 flex items-end justify-between">
-          <h2 className="font-heading text-3xl font-bold text-panka-brown-500">{title}</h2>
+          <h2 className="font-heading text-4xl font-bold text-on-surface">{title}</h2>
           <div className="flex items-center gap-2">
             {href && (
               <Link
                 href={href}
-                className="mr-2 text-sm font-medium text-grey-40 transition-colors hover:text-panka-brown-500"
+                className="mr-2 text-sm font-semibold text-primary transition-colors hover:underline underline-offset-8"
               >
                 {t("carousel.viewAll")}
               </Link>
             )}
             <button
               onClick={() => scroll("left")}
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-grey-10 text-grey-40 transition-all hover:border-grey-20 hover:text-grey-70"
+              className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-container-highest text-on-surface shadow-[var(--shadow-editorial)] transition-colors hover:bg-surface-variant"
             >
               <HiChevronLeft className="h-4 w-4" />
             </button>
             <button
               onClick={() => scroll("right")}
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-grey-10 text-grey-40 transition-all hover:border-grey-20 hover:text-grey-70"
+              className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-container-highest text-on-surface shadow-[var(--shadow-editorial)] transition-colors hover:bg-surface-variant"
             >
               <HiChevronRight className="h-4 w-4" />
             </button>

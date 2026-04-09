@@ -38,18 +38,18 @@ export default function DeliveryInfo() {
   const current = tabs.find((tab) => tab.id === active)!;
 
   return (
-    <section className="py-14">
+    <section className="py-20 bg-surface">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="overflow-hidden rounded-2xl border border-grey-10 bg-white">
-          <div className="flex border-b border-grey-10">
+        <div className="overflow-hidden rounded-3xl bg-surface-container-low shadow-[var(--shadow-editorial)]">
+          <div className="flex bg-surface-container">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActive(tab.id)}
-                className={`flex flex-1 items-center justify-center gap-2 px-4 py-4 text-sm font-medium transition-all ${
+                className={`flex flex-1 items-center justify-center gap-2 px-4 py-4 text-sm font-semibold uppercase tracking-widest transition-all ${
                   active === tab.id
-                    ? "border-b-2 border-panka-brown-500 text-panka-brown-500 bg-panka-cream/30"
-                    : "text-grey-40 hover:text-grey-60 hover:bg-grey-5"
+                    ? "text-primary bg-surface-container-lowest"
+                    : "text-secondary/70 hover:text-secondary hover:bg-surface-container-highest"
                 }`}
               >
                 <tab.icon className="h-4 w-4" />
@@ -61,15 +61,15 @@ export default function DeliveryInfo() {
           <div className="p-6 small:p-8">
             <div className="grid grid-cols-1 gap-6 small:grid-cols-2">
               <div>
-                <h3 className="mb-2 font-heading text-2xl font-bold text-panka-brown-500">
+                <h3 className="mb-3 font-heading text-3xl font-bold text-on-surface">
                   {current.title}
                 </h3>
-                <p className="text-base leading-relaxed text-grey-50">{current.description}</p>
+                <p className="text-base leading-relaxed text-tertiary">{current.description}</p>
               </div>
               <ul className="flex flex-col gap-3">
                 {current.details.map((detail, i) => (
-                  <li key={i} className="flex items-start gap-3 text-base text-grey-60">
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-circle bg-panka-green-400" />
+                  <li key={i} className="flex items-start gap-3 text-base text-tertiary">
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-circle bg-primary" />
                     {detail}
                   </li>
                 ))}

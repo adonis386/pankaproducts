@@ -2,6 +2,40 @@
 @plugin "tailwindcss-radix";
 
 @theme {
+  /* ── Editorial Surfaces & Semantic Tokens (docs/DESIGN.md) ── */
+  --color-surface: #fcf9f4;
+  --color-background: #fcf9f4;
+  --color-on-surface: #1c1c19;
+  --color-on-background: #1c1c19;
+
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f6f3ee;
+  --color-surface-container: #f0ede8;
+  --color-surface-container-high: #ebe8e3;
+  --color-surface-container-highest: #e5e2dd;
+  --color-surface-variant: #e5e2dd;
+  --color-outline-variant: #becaba;
+
+  --color-primary: #006b25;
+  --color-primary-container: #248639;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #f7fff2;
+
+  --color-secondary: #7a5829;
+  --color-secondary-container: #ffcf95;
+  --color-secondary-fixed-dim: #ecbf86;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #795728;
+  --color-on-secondary-fixed-variant: #604013;
+
+  --color-tertiary: #6e5841;
+  --color-on-tertiary: #ffffff;
+  --color-on-surface-variant: #3f4a3e;
+
+  --color-primary-fixed-dim: #7cdb84;
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+
   /* ── Colors: Panka Brown ── */
   --color-panka-brown-50: #FAF6F1;
   --color-panka-brown-100: #F0E6D5;
@@ -44,8 +78,8 @@
   --color-grey-90: #111827;
 
   /* ── Fonts ── */
-  --font-sans: var(--font-dm-sans), "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-heading: var(--font-playfair), "Playfair Display", Georgia, serif;
+  --font-sans: var(--font-plus-jakarta), "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-heading: var(--font-noto-serif), "Noto Serif", Georgia, serif;
 
   /* ── Border Radius ── */
   --radius-none: 0px;
@@ -62,6 +96,9 @@
   --shadow-panka-md: 0 4px 16px rgba(108, 75, 30, 0.08);
   --shadow-panka-lg: 0 8px 32px rgba(108, 75, 30, 0.12);
   --shadow-panka-hover: 0 12px 40px rgba(108, 75, 30, 0.15);
+
+  --shadow-editorial: 0 16px 32px -8px rgba(28, 28, 25, 0.05);
+  --shadow-editorial-lg: 0 24px 56px -18px rgba(28, 28, 25, 0.08);
 
   /* ── Font Sizes ── */
   --text-3xl: 2rem;
@@ -151,14 +188,14 @@
 html { scroll-behavior: smooth; }
 
 body {
-  background-color: var(--color-grey-0);
-  color: var(--color-grey-80);
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
   font-family: var(--font-sans);
 }
 
 ::selection {
-  background-color: var(--color-panka-brown-200);
-  color: var(--color-panka-brown-900);
+  background-color: var(--color-secondary-container);
+  color: var(--color-on-surface);
 }
 
 /* ── Scrollbar hide for carousels ── */
@@ -167,9 +204,9 @@ body {
 
 /* ── Glass ── */
 .glass {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(252, 249, 244, 0.8);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 }
 .glass-dark {
   background: rgba(36, 25, 9, 0.6);

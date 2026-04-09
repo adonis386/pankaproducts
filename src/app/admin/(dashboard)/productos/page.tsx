@@ -208,60 +208,49 @@ export default function AdminProductosPage() {
 
   if (!user) {
     return (
-      <section className="mx-auto max-w-3xl px-6 py-16">
-        <div className="rounded-2xl border border-grey-10 bg-white p-8">
-          <h1 className="mb-2 font-heading text-3xl font-bold text-panka-brown-500">
-            Admin
-          </h1>
-          <p className="text-grey-50">Debes iniciar sesión para acceder al panel.</p>
-          <p className="mt-4 text-sm text-grey-40">
-            Ve a <Link className="underline" href="/admin">/admin</Link> e inicia sesión.
-          </p>
-        </div>
-      </section>
+      <div className="mx-auto max-w-lg rounded-[2rem] border border-outline-variant/20 bg-surface-container-lowest p-8 shadow-sm">
+        <h1 className="mb-2 font-heading text-3xl font-bold text-on-surface">Admin</h1>
+        <p className="text-on-surface-variant">Debes iniciar sesión para acceder al panel.</p>
+        <p className="mt-4 text-sm text-tertiary">
+          Ve a <Link className="font-semibold text-primary underline underline-offset-2" href="/admin">/admin</Link>{" "}
+          e inicia sesión.
+        </p>
+      </div>
     );
   }
 
   return (
     <>
-      <section className="border-b border-grey-10 bg-white pb-8 pt-12">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="flex flex-col gap-3 small:flex-row small:items-end small:justify-between">
-            <div>
-              <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-grey-30">
-                Admin
-              </p>
-              <h1 className="font-heading text-4xl font-bold text-panka-brown-500">
-                Productos
-              </h1>
-              <p className="mt-2 text-sm text-grey-40">
-                Gestiona tu menú sin entrar a Stripe.
-              </p>
-            </div>
-            <button
-              onClick={load}
-              disabled={!canUseAdmin || busy}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-grey-10 bg-white px-5 py-3 text-sm font-semibold text-grey-70 transition-colors hover:bg-grey-5 disabled:opacity-50"
-            >
-              <HiOutlineRefresh className="h-5 w-5" />
-              Refresh
-            </button>
+      <header className="mb-10">
+        <div className="flex flex-col gap-3 small:flex-row small:items-end small:justify-between">
+          <div>
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-tertiary">Menu Management</p>
+            <h1 className="font-heading text-4xl font-bold tracking-tight text-on-surface">Productos</h1>
+            <p className="mt-2 text-sm font-medium text-tertiary">Gestiona tu menú sin entrar a Stripe.</p>
           </div>
-          {notice && (
-            <div className="mt-6 rounded-xl border border-panka-green-100 bg-panka-green-50 p-4 text-sm font-medium text-panka-green-700">
-              {notice}
-            </div>
-          )}
-          {error && (
-            <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-              {error}
-            </div>
-          )}
+          <button
+            onClick={load}
+            disabled={!canUseAdmin || busy}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-surface-container-high px-5 py-3 text-sm font-bold text-on-surface transition-colors hover:bg-surface-variant disabled:opacity-50"
+          >
+            <HiOutlineRefresh className="h-5 w-5" />
+            Refresh
+          </button>
         </div>
-      </section>
+        {notice && (
+          <div className="mt-6 rounded-2xl border border-panka-green-200/60 bg-panka-green-50 p-4 text-sm font-medium text-panka-green-700">
+            {notice}
+          </div>
+        )}
+        {error && (
+          <div className="mt-6 rounded-2xl border border-error/20 bg-error-container/40 p-4 text-sm text-error">
+            {error}
+          </div>
+        )}
+      </header>
 
-      <section className="py-10">
-        <div className="mx-auto max-w-7xl px-6">
+      <section>
+        <div className="mx-auto max-w-7xl">
           <div className="grid grid-cols-1 gap-8 small:grid-cols-3">
             <div className="small:col-span-1">
               <div className="rounded-2xl border border-grey-10 bg-white p-6">

@@ -95,17 +95,17 @@ export default function CheckoutPage() {
   }
 
   const inputClass =
-    "w-full rounded-xl border border-grey-20 bg-grey-5 px-4 py-3.5 text-base text-grey-80 outline-none transition-all placeholder:text-grey-30 focus:border-panka-green-400 focus:ring-2 focus:ring-panka-green-50";
+    "w-full rounded-xl border-0 bg-surface-container-highest px-4 py-3.5 text-base text-on-surface outline-none transition-all placeholder:text-tertiary/60 focus:ring-2 focus:ring-primary/15";
 
   return (
     <>
-      <section className="border-b border-grey-10 bg-white pb-6 pt-10">
+      <section className="bg-surface pb-8 pt-14">
         <div className="mx-auto max-w-7xl px-6">
-          <Link href="/productos" className="mb-3 inline-flex items-center gap-1.5 text-sm text-grey-40 transition-colors hover:text-grey-60">
+          <Link href="/productos" className="mb-4 inline-flex items-center gap-1.5 text-sm text-secondary/70 transition-colors hover:text-secondary">
             <HiArrowLeft className="h-4 w-4" />
             {t("checkout.continueShopping")}
           </Link>
-          <h1 className="font-heading text-3xl font-bold text-panka-brown-500">{t("checkout.title")}</h1>
+          <h1 className="font-heading text-5xl font-bold text-on-surface">{t("checkout.title")}</h1>
           <div className="mt-6">
             <ol className="flex flex-wrap items-center gap-4">
               {steps.map((label, idx) => (
@@ -113,15 +113,15 @@ export default function CheckoutPage() {
                   <span
                     className={`flex h-10 w-10 items-center justify-center rounded-xl border text-sm font-bold ${
                       idx <= currentStep
-                        ? "border-panka-green-200 bg-panka-green-50 text-panka-green-600"
-                        : "border-grey-10 bg-white text-grey-40"
+                        ? "border-primary/15 bg-secondary-container/25 text-primary"
+                        : "border-outline-variant/20 bg-surface-container-lowest text-tertiary"
                     }`}
                   >
                     {idx < currentStep ? "✓" : idx + 1}
                   </span>
                   <span
                     className={`text-sm font-semibold ${
-                      idx <= currentStep ? "text-grey-80" : "text-grey-40"
+                      idx <= currentStep ? "text-on-surface" : "text-tertiary"
                     }`}
                   >
                     {label}
@@ -137,31 +137,31 @@ export default function CheckoutPage() {
         <div className="mx-auto max-w-7xl px-6">
           <div className="grid grid-cols-1 gap-8 small:grid-cols-5">
             <form onSubmit={handleSubmit} className="small:col-span-3">
-              <div className="rounded-2xl border border-grey-10 bg-white p-6 small:p-8">
-                <h2 className="mb-6 text-lg font-bold text-grey-80">{t("checkout.deliveryDetails")}</h2>
+              <div className="rounded-3xl bg-surface-container-low p-6 shadow-[var(--shadow-editorial)] small:p-8">
+                <h2 className="mb-6 font-heading text-3xl font-bold text-on-surface">{t("checkout.deliveryDetails")}</h2>
                 <div className="grid grid-cols-1 gap-4 xsmall:grid-cols-2">
                   <div className="xsmall:col-span-2">
-                    <label className="mb-1.5 block text-sm font-medium text-grey-50">{t("checkout.fullName")}</label>
+                    <label className="mb-1.5 block text-sm font-semibold uppercase tracking-widest text-secondary/80">{t("checkout.fullName")}</label>
                     <input type="text" name="name" value={form.name} onChange={handleChange} required className={inputClass} placeholder={t("checkout.namePlaceholder")} />
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-grey-50">{t("checkout.email")}</label>
+                    <label className="mb-1.5 block text-sm font-semibold uppercase tracking-widest text-secondary/80">{t("checkout.email")}</label>
                     <input type="email" name="email" value={form.email} onChange={handleChange} required className={inputClass} placeholder="email@example.com" />
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-grey-50">{t("checkout.phone")}</label>
+                    <label className="mb-1.5 block text-sm font-semibold uppercase tracking-widest text-secondary/80">{t("checkout.phone")}</label>
                     <input type="tel" name="phone" value={form.phone} onChange={handleChange} required className={inputClass} placeholder="(305) 123-4567" />
                   </div>
                   <div className="xsmall:col-span-2">
-                    <label className="mb-1.5 block text-sm font-medium text-grey-50">{t("checkout.address")}</label>
+                    <label className="mb-1.5 block text-sm font-semibold uppercase tracking-widest text-secondary/80">{t("checkout.address")}</label>
                     <input type="text" name="address" value={form.address} onChange={handleChange} required className={inputClass} placeholder={t("checkout.addressPlaceholder")} />
                   </div>
                   <div className="xsmall:col-span-2">
-                    <label className="mb-1.5 block text-sm font-medium text-grey-50">{t("checkout.city")}</label>
+                    <label className="mb-1.5 block text-sm font-semibold uppercase tracking-widest text-secondary/80">{t("checkout.city")}</label>
                     <input type="text" name="city" value={form.city} onChange={handleChange} required className={inputClass} placeholder={t("checkout.cityPlaceholder")} />
                   </div>
                   <div className="xsmall:col-span-2">
-                    <label className="mb-1.5 block text-sm font-medium text-grey-50">{t("checkout.notes")}</label>
+                    <label className="mb-1.5 block text-sm font-semibold uppercase tracking-widest text-secondary/80">{t("checkout.notes")}</label>
                     <textarea name="notes" value={form.notes} onChange={handleChange} rows={3} className={`${inputClass} resize-none`} placeholder={t("checkout.notesPlaceholder")} />
                   </div>
                 </div>
@@ -169,7 +169,7 @@ export default function CheckoutPage() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="mt-6 w-full rounded-xl bg-panka-brown-500 py-4 text-base font-bold text-white transition-all hover:bg-panka-brown-600 hover:shadow-panka-md disabled:opacity-50"
+                    className="mt-6 w-full rounded-xl bg-gradient-to-br from-primary to-primary-container py-4 text-base font-bold text-on-primary shadow-[var(--shadow-editorial)] transition-all hover:brightness-[1.02] disabled:opacity-50"
                   >
                     {isSubmitting ? t("checkout.processing") : `${t("checkout.confirmOrder")} — $${totalPrice.toFixed(2)}`}
                   </button>
@@ -196,8 +196,8 @@ export default function CheckoutPage() {
             </form>
 
             <div className="small:col-span-2">
-              <div className="sticky top-24 rounded-2xl border border-grey-10 bg-white p-6">
-                <h2 className="mb-5 text-lg font-bold text-grey-80">{t("checkout.orderSummary")}</h2>
+              <div className="sticky top-24 rounded-3xl bg-surface-container-low p-6 shadow-[var(--shadow-editorial)]">
+                <h2 className="mb-5 font-heading text-2xl font-bold text-on-surface">{t("checkout.orderSummary")}</h2>
                 <ul className="mb-5 flex flex-col gap-3">
                   {items.map((item) => (
                     <li key={item.product.id} className="flex gap-3">
@@ -206,26 +206,26 @@ export default function CheckoutPage() {
                       </div>
                       <div className="flex flex-1 items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-grey-70 leading-tight">{item.product.name}</p>
-                          <p className="text-xs text-grey-30">x{item.quantity}</p>
+                          <p className="text-sm font-medium text-on-surface leading-tight">{item.product.name}</p>
+                          <p className="text-xs text-tertiary">x{item.quantity}</p>
                         </div>
-                        <p className="text-sm font-semibold text-grey-70">${(item.product.price * item.quantity).toFixed(2)}</p>
+                        <p className="text-sm font-semibold text-on-surface">${(item.product.price * item.quantity).toFixed(2)}</p>
                       </div>
                     </li>
                   ))}
                 </ul>
-                <div className="border-t border-grey-10 pt-4">
-                  <div className="mb-1.5 flex justify-between text-sm text-grey-40">
+                <div className="border-t border-outline-variant/10 pt-4">
+                  <div className="mb-1.5 flex justify-between text-sm text-tertiary">
                     <span>{t("checkout.subtotal")}</span>
                     <span>${totalPrice.toFixed(2)}</span>
                   </div>
-                  <div className="mb-1.5 flex justify-between text-sm text-grey-40">
+                  <div className="mb-1.5 flex justify-between text-sm text-tertiary">
                     <span>{t("checkout.shipping")}</span>
-                    <span className="text-panka-green-600">{t("checkout.free")}</span>
+                    <span className="text-primary">{t("checkout.free")}</span>
                   </div>
-                  <div className="mt-3 flex justify-between border-t border-grey-10 pt-3">
-                    <span className="text-base font-bold text-grey-80">{t("checkout.total")}</span>
-                    <span className="text-base font-bold text-grey-80">${totalPrice.toFixed(2)}</span>
+                  <div className="mt-3 flex justify-between border-t border-outline-variant/10 pt-3">
+                    <span className="text-base font-bold text-on-surface">{t("checkout.total")}</span>
+                    <span className="text-base font-bold text-on-surface">${totalPrice.toFixed(2)}</span>
                   </div>
                 </div>
               </div>

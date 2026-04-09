@@ -15,16 +15,16 @@ export default function Newsletter() {
   };
 
   return (
-    <section className="py-14">
+    <section className="py-16 bg-surface">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="rounded-2xl bg-panka-cream px-6 py-14 text-center small:px-16">
-          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-panka-brown-300">
+        <div className="rounded-3xl bg-surface-container-low px-6 py-14 text-center shadow-[var(--shadow-editorial)] small:px-16">
+          <p className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-secondary">
             {t("newsletter.tag")}
           </p>
-          <h2 className="mb-3 font-heading text-3xl font-bold text-panka-brown-500 small:text-4xl">
+          <h2 className="mb-3 font-heading text-4xl font-bold text-on-surface small:text-5xl">
             {t("newsletter.title")}
           </h2>
-          <p className="mx-auto mb-8 max-w-md text-base text-grey-50">
+          <p className="mx-auto mb-8 max-w-md text-base text-tertiary">
             {t("newsletter.desc")}
           </p>
 
@@ -41,11 +41,11 @@ export default function Newsletter() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t("newsletter.placeholder")}
                 required
-                className="flex-1 rounded-xl border border-panka-brown-100 bg-white px-5 py-3.5 text-base text-grey-80 outline-none placeholder:text-grey-30 focus:border-panka-green-400 focus:ring-2 focus:ring-panka-green-50"
+                className="flex-1 rounded-xl border-0 bg-surface-container-highest px-5 py-3.5 text-base text-on-surface outline-none placeholder:text-tertiary/60 focus:ring-2 focus:ring-primary/15"
               />
               <button
                 type="submit"
-                className="rounded-xl bg-panka-brown-500 px-7 py-3.5 text-base font-bold text-white transition-all hover:bg-panka-brown-600 hover:shadow-panka-sm"
+                className="rounded-xl bg-gradient-to-br from-primary to-primary-container px-7 py-3.5 text-base font-bold text-on-primary shadow-[var(--shadow-editorial)] transition-all hover:brightness-[1.02]"
               >
                 {t("newsletter.submit")}
               </button>

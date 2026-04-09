@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import {
   HiOutlineShoppingBag,
   HiOutlineMenu,
@@ -19,6 +20,7 @@ export default function Navbar() {
   const { totalItems, toggleCart } = useCart();
   const { user, logout } = useAuth();
   const { locale, setLocale, t } = useLanguage();
+  const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -33,19 +35,31 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 glass border-b border-grey-20/60">
-        <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+      <header className="sticky top-0 z-40 w-full glass">
+        <nav className="mx-auto flex max-w-7xl items-center justify-between px-8 py-4">
           <Link href="/" className="flex items-center gap-2.5">
-            <Image src="/logo.png" alt="Panka" width={42} height={42} className="rounded-circle" />
-            <span className="font-heading text-2xl font-bold text-panka-brown-500">Panka</span>
+            <Image
+              src="/assets/PNAKALOGO.png"
+              alt="Panka"
+              width={160}
+              height={48}
+              className="h-16 w-auto"
+              priority
+            />
+            <span className="sr-only">Panka</span>
           </Link>
 
-          <ul className="hidden small:flex items-center gap-1">
+          <ul className="hidden small:flex items-center gap-8">
             {navLinks.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className="rounded-xl px-5 py-2.5 text-[15px] font-medium text-grey-60 transition-colors hover:bg-grey-5 hover:text-panka-brown-500"
+                  className={[
+                    "font-heading text-lg font-medium transition-opacity duration-300",
+                    pathname === link.href
+                      ? "text-primary border-b-2 border-primary pb-1 opacity-100"
+                      : "text-on-surface/80 opacity-70 hover:opacity-100",
+                  ].join(" ")}
                 >
                   {link.label}
                 </Link>
@@ -57,8 +71,8 @@ export default function Navbar() {
             {/* Language toggle */}
             <button
               onClick={toggleLang}
-              className="flex items-center gap-1.5 rounded-xl px-3 py-2.5 text-sm font-medium text-grey-50 transition-colors hover:bg-grey-5 hover:text-grey-70"
-              aria-label="Change language"
+              className="flex items-center gap-1.5 rounded-xl px-3 py-2.5 text-sm font-medium text-secondary/80 transition-colors hover:bg-surface-container-highest hover:text-secondary"
+              aria-label={t("nav.changeLanguage")}
             >
               <HiOutlineGlobeAlt className="h-4 w-4" />
               <span className="uppercase">{locale}</span>
@@ -69,7 +83,7 @@ export default function Navbar() {
               <div className="relative">
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-grey-60 transition-colors hover:bg-grey-5"
+                  className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-secondary/80 transition-colors hover:bg-surface-container-highest"
                 >
                   <div className="flex h-7 w-7 items-center justify-center rounded-circle bg-panka-green-50 text-xs font-bold text-panka-green-600">
                     {user.displayName?.[0] || user.email?.[0]?.toUpperCase() || "U"}
@@ -79,17 +93,17 @@ export default function Navbar() {
                   </span>
                 </button>
                 {userMenuOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-48 rounded-xl border border-grey-10 bg-white p-1.5 shadow-panka-md animate-scale-in">
+                  <div className="absolute right-0 top-full mt-2 w-48 rounded-xl bg-white p-1.5 shadow-panka-md animate-scale-in">
                     <Link
                       href="/cuenta"
                       onClick={() => setUserMenuOpen(false)}
-                      className="block rounded-lg px-3 py-2 text-sm text-grey-60 transition-colors hover:bg-grey-5"
+                      className="block rounded-lg px-3 py-2 text-sm text-secondary/80 transition-colors hover:bg-surface-container-highest"
                     >
                       {t("nav.myAccount")}
                     </Link>
                     <button
                       onClick={() => { logout(); setUserMenuOpen(false); }}
-                      className="block w-full rounded-lg px-3 py-2 text-left text-sm text-grey-60 transition-colors hover:bg-grey-5"
+                      className="block w-full rounded-lg px-3 py-2 text-left text-sm text-secondary/80 transition-colors hover:bg-surface-container-highest"
                     >
                       {t("nav.signOut")}
                     </button>
@@ -99,7 +113,7 @@ export default function Navbar() {
             ) : (
               <button
                 onClick={() => setAuthOpen(true)}
-                className="hidden xsmall:flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-medium text-grey-60 transition-colors hover:bg-grey-5"
+                className="hidden xsmall:flex items-center gap-1.5 rounded-xl bg-surface-container-highest px-4 py-2.5 text-sm font-medium text-secondary/80 shadow-[var(--shadow-editorial)] transition-colors hover:bg-surface-variant"
               >
                 <HiOutlineUser className="h-4 w-4" />
                 {t("nav.signIn")}
@@ -109,7 +123,7 @@ export default function Navbar() {
             {/* Cart */}
             <button
               onClick={toggleCart}
-              className="relative rounded-xl bg-grey-5 p-2.5 transition-all hover:bg-grey-10"
+              className="relative rounded-xl bg-surface-container-highest p-2.5 shadow-[var(--shadow-editorial)] transition-colors hover:bg-surface-variant"
               aria-label={t("nav.cart")}
             >
               <HiOutlineShoppingBag className="h-5 w-5 text-grey-70" />
@@ -122,8 +136,11 @@ export default function Navbar() {
 
             {/* Mobile */}
             <button
+              type="button"
               onClick={() => setMobileOpen(!mobileOpen)}
               className="small:hidden rounded-xl p-2.5 text-grey-60 transition-colors hover:bg-grey-5"
+              aria-label={mobileOpen ? t("nav.closeMenu") : t("nav.openMenu")}
+              aria-expanded={mobileOpen}
             >
               {mobileOpen ? <HiOutlineX className="h-5 w-5" /> : <HiOutlineMenu className="h-5 w-5" />}
             </button>
@@ -131,7 +148,7 @@ export default function Navbar() {
         </nav>
 
         {mobileOpen && (
-          <div className="small:hidden border-t border-grey-10 bg-white animate-fade-in-top">
+          <div className="small:hidden bg-white/80 backdrop-blur-2xl animate-fade-in-top">
             <div className="flex flex-col gap-0.5 px-4 py-3">
               {navLinks.map((link) => (
                 <Link

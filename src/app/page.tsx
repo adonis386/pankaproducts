@@ -8,6 +8,8 @@ import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 import { useCatalog } from "@/context/CatalogContext";
 import ProductCardSkeleton from "@/components/ProductCardSkeleton";
+import ProductCard from "@/components/ProductCard";
+import Link from "next/link";
 
 export default function Home() {
   const { t } = useLanguage();
@@ -23,6 +25,8 @@ export default function Home() {
 
   const bannerHref = especiales.length > 0 ? "/productos?cat=especiales" : "/productos";
   const bannerTag = especiales.length > 0 ? t("home.specials") : t("home.bestSellers");
+
+  const featured = [...popular, ...products.filter((p) => !p.isPopular)].slice(0, 3);
 
   return (
     <>
@@ -52,27 +56,60 @@ export default function Home() {
         <ProductCarousel title={t("home.bestSellers")} products={popular} href="/productos" />
       )}
 
+      {!loading && featured.length > 0 && (
+        <section className="py-24 bg-surface-container-low">
+          <div className="mx-auto max-w-7xl px-6">
+            <div className="mb-16 flex items-end justify-between gap-6">
+              <div>
+                <h2 className="mb-4 font-heading text-4xl text-on-surface">{t("home.seasonalSelections")}</h2>
+                <p className="text-tertiary">{t("home.signatureDesc")}</p>
+              </div>
+              <Link
+                href="/productos"
+                className="hidden small:inline-flex items-center gap-2 text-primary font-semibold hover:underline underline-offset-8 transition-all"
+              >
+                {t("home.viewAllFlavors")} <span aria-hidden>→</span>
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 gap-8 small:grid-cols-3">
+              {featured.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       <DeliveryInfo />
 
       {/* Banner */}
-      <section className="py-14">
+      <section className="py-20 bg-surface">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="relative overflow-hidden rounded-2xl bg-panka-brown-500">
+          <div className="relative overflow-hidden rounded-3xl bg-surface-container shadow-[var(--shadow-editorial-lg)]">
             <div className="grid grid-cols-1 small:grid-cols-2">
               <div className="relative z-10 flex flex-col justify-center px-8 py-14 small:px-14 small:py-20">
-                <span className="mb-3 text-sm font-semibold uppercase tracking-widest text-panka-brown-200">
+                <span className="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-secondary">
                   {bannerTag}
                 </span>
-                <p className="mb-6 max-w-sm text-base leading-relaxed text-panka-brown-200">
+                <h3 className="mb-4 max-w-xl font-heading text-4xl font-bold leading-[1.15] text-on-surface">
+                  {t("home.allTamales")}
+                </h3>
+                <p className="mb-8 max-w-sm text-base leading-relaxed text-tertiary">
                   {t("home.bannerDesc")}
                 </p>
-                <a href={bannerHref} className="w-fit rounded-xl bg-white px-7 py-3.5 text-base font-bold text-panka-brown-500 transition-all hover:shadow-panka-md">
+                <a
+                  href={bannerHref}
+                  className="w-fit rounded-xl bg-gradient-to-br from-primary to-primary-container px-7 py-3.5 text-base font-semibold text-on-primary shadow-[var(--shadow-editorial)] transition-all hover:brightness-[1.02]"
+                >
                   {t("home.discover")}
                 </a>
               </div>
               <div className="relative min-h-[250px]">
                 <Image src="/hero_3.jpg" alt="Tamales" fill className="object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-r from-panka-brown-500 via-panka-brown-500/40 to-transparent small:from-panka-brown-500/60" />
+                <div className="absolute inset-0 bg-gradient-to-r from-surface-container via-surface-container/30 to-transparent small:from-surface-container/70" />
+                <div className="pointer-events-none absolute -bottom-10 -left-10 h-40 w-40 rounded-circle bg-secondary-container/35 blur-3xl" />
+                <div className="pointer-events-none absolute -top-10 -right-10 h-52 w-52 rounded-circle bg-primary-container/25 blur-3xl" />
               </div>
             </div>
           </div>
@@ -90,7 +127,7 @@ export default function Home() {
       )}
 
       {/* Reviews */}
-      <section className="py-14">
+      <section className="py-16 bg-grey-5/60">
         <div className="mx-auto max-w-7xl px-6">
           <h2 className="mb-8 font-heading text-3xl font-bold text-panka-brown-500">
             {t("home.reviewsTitle")}
@@ -101,7 +138,7 @@ export default function Home() {
               { name: "Carlos L.", text: t("home.review2") },
               { name: "Ana M.", text: t("home.review3") },
             ].map((review) => (
-              <div key={review.name} className="rounded-2xl border border-grey-10 bg-white p-6 transition-all hover:shadow-panka-sm">
+              <div key={review.name} className="rounded-2xl bg-white p-6 shadow-panka-xs transition-all hover:shadow-panka-sm">
                 <div className="mb-3 flex gap-0.5 text-sm text-amber-400">
                   {"★★★★★".split("").map((s, i) => <span key={i}>{s}</span>)}
                 </div>
@@ -114,6 +151,7 @@ export default function Home() {
       </section>
 
       <Newsletter />
+
     </>
   );
 }

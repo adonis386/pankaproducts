@@ -42,12 +42,12 @@ export default function ProductosPage() {
 
   return (
     <>
-      <section className="border-b border-grey-10 bg-white pb-10 pt-14">
+      <section className="bg-surface pb-10 pt-16">
         <div className="mx-auto max-w-7xl px-6">
-          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-grey-30">
+          <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-secondary">
             {t("productos.tag")}
           </p>
-          <h1 className="mb-6 font-heading text-4xl font-bold text-panka-brown-500 small:text-5xl">
+          <h1 className="mb-8 font-heading text-5xl font-bold text-on-surface small:text-6xl">
             {t("productos.title")}
           </h1>
           <div className="flex flex-wrap gap-2">
@@ -55,10 +55,10 @@ export default function ProductosPage() {
               <button
                 key={cat.value}
                 onClick={() => setActiveCategory(cat.value)}
-                className={`rounded-xl px-5 py-2.5 text-sm font-medium transition-all ${
+                className={`rounded-xl px-5 py-2.5 text-sm font-semibold uppercase tracking-widest transition-all ${
                   activeCategory === cat.value
-                    ? "bg-panka-brown-500 text-white"
-                    : "bg-grey-5 text-grey-50 hover:bg-grey-10 hover:text-grey-70"
+                    ? "bg-primary text-on-primary shadow-[var(--shadow-editorial)]"
+                    : "bg-surface-container-highest text-secondary/80 shadow-[var(--shadow-editorial)] hover:bg-surface-variant hover:text-secondary"
                 }`}
               >
                 {cat.label}

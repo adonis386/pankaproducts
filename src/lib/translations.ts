@@ -3,37 +3,54 @@ export type Locale = "en" | "es";
 const translations = {
   // ── Navbar ──
   "nav.home": { en: "Home", es: "Inicio" },
-  "nav.tamales": { en: "Tamales", es: "Tamales" },
-  "nav.about": { en: "About", es: "Nosotros" },
-  "nav.signIn": { en: "Sign In", es: "Ingresar" },
-  "nav.myAccount": { en: "My Account", es: "Mi Cuenta" },
-  "nav.signOut": { en: "Sign Out", es: "Cerrar Sesión" },
-  "nav.cart": { en: "Cart", es: "Carrito" },
+  "nav.tamales": { en: "Menu", es: "Menú" },
+  "nav.about": { en: "Our Story", es: "Nosotros" },
+  "nav.signIn": { en: "Sign in", es: "Entrar" },
+  "nav.myAccount": { en: "My account", es: "Mi cuenta" },
+  "nav.signOut": { en: "Sign out", es: "Cerrar sesión" },
+  "nav.cart": { en: "Open cart", es: "Abrir carrito" },
+  "nav.changeLanguage": { en: "Change language", es: "Cambiar idioma" },
+  "nav.openMenu": { en: "Open menu", es: "Abrir menú" },
+  "nav.closeMenu": { en: "Close menu", es: "Cerrar menú" },
 
   // ── Announcement Bar ──
+  "announce.close": { en: "Close announcement", es: "Cerrar aviso" },
   "announce.1": {
     en: "Free shipping on orders over $50",
-    es: "Envío gratis en pedidos mayores a $50",
+    es: "Envío gratis en compras mayores a $50",
   },
   "announce.2": {
-    en: "Freshly made tamales every day — Order before 2pm, next day delivery",
-    es: "Tamales recién hechos todos los días — Pedidos antes de las 2pm, entrega al día siguiente",
+    en: "Made fresh daily — order before 2pm for next-day delivery in Miami",
+    es: "Hechos al día — pide antes de las 2pm y recibe al día siguiente en Miami",
   },
   "announce.3": {
-    en: "Catering for special events? We do bulk orders!",
-    es: "¿Evento especial? ¡Hacemos pedidos por mayoreo!",
+    en: "Planning an event? Ask us about catering and bulk orders",
+    es: "¿Celebras algo? Pregunta por catering y pedidos por volumen",
   },
 
   // ── Hero ──
-  "hero.badge": { en: "Handmade · Fresh · Daily", es: "Artesanales · Frescos · Diarios" },
-  "hero.titleLine1": { en: "Tamales like", es: "Tamales como los" },
-  "hero.titleLine2": { en: "abuela's", es: "de casa" },
-  "hero.subtitle": {
-    en: "Generational recipes, fresh ingredients, delivered to your door in Miami. Order today, enjoy tomorrow.",
-    es: "Recetas de generaciones, ingredientes frescos y entrega a tu puerta en Miami. Ordena hoy y recíbelos mañana.",
+  "hero.badge": {
+    en: "Nixtamal daily · Hand-wrapped · Miami",
+    es: "Nixtamal al día · Envueltos a mano · Miami",
   },
-  "hero.orderNow": { en: "Order Now", es: "Ordenar Ahora" },
-  "hero.viewMenu": { en: "View Menu", es: "Ver Menú" },
+  "hero.titleLine1": { en: "Tamales that taste", es: "Tamales con sabor" },
+  "hero.titleLine2": { en: "like Sunday", es: "a domingo" },
+  "hero.subtitle": {
+    en: "We grind masa from real corn, fill each one with care, and steam them slow — then send them warm to your door anywhere in Miami. Order before 2pm for next-day delivery.",
+    es: "Molimos maíz de verdad, rellenamos con mimo y los dejamos al vapor sin prisa; después te los mandamos calientitos donde estés en Miami. Pide antes de las 2pm para recibir al día siguiente.",
+  },
+  "hero.orderNow": { en: "Order now", es: "Pedir ahora" },
+  "hero.viewMenu": { en: "View menu", es: "Ver menú" },
+  "hero.carouselLabel": { en: "Featured photos", es: "Fotos destacadas" },
+  "hero.carouselSlide1Alt": {
+    en: "Hand-wrapped tamales in a basket on a wooden tray",
+    es: "Tamales envueltos a mano en una canasta sobre bandeja de madera",
+  },
+  "hero.carouselSlide2Alt": {
+    en: "Artisan tamales — close-up of texture and leaves",
+    es: "Tamales artesanales, detalle de textura y hojas",
+  },
+  "hero.goToSlide": { en: "Go to slide", es: "Ir a la imagen" },
   "hero.ordersMonth": { en: "Orders / month", es: "Pedidos / mes" },
   "hero.rating": { en: "Rating", es: "Calificación" },
   "hero.delivery": { en: "Delivery", es: "Entrega" },
@@ -53,6 +70,12 @@ const translations = {
 
   // ── Homepage Sections ──
   "home.bestSellers": { en: "Best Sellers", es: "Los Favoritos" },
+  "home.seasonalSelections": { en: "Seasonal Selections", es: "Selecciones de Temporada" },
+  "home.signatureDesc": {
+    en: "Our signature tamales, prepared daily with stone-ground masa.",
+    es: "Nuestros tamales insignia, preparados a diario con masa artesanal.",
+  },
+  "home.viewAllFlavors": { en: "View all flavors", es: "Ver todos los sabores" },
   "home.allTamales": { en: "Menu", es: "Menú" },
   "home.savory": { en: "Savory", es: "Salados" },
   "home.sweet": { en: "Sweet", es: "Dulces" },
@@ -137,13 +160,47 @@ const translations = {
 
   // ── Cart Drawer ──
   "cart.title": { en: "Cart", es: "Carrito" },
-  "cart.empty": { en: "Your cart is empty", es: "Tu carrito está vacío" },
-  "cart.emptyDesc": { en: "Add some tamales to get started", es: "Agrega tamales para comenzar" },
-  "cart.browseTamales": { en: "Browse Tamales", es: "Ver Tamales" },
-  "cart.goesGreatWith": { en: "Goes great with", es: "Va muy bien con" },
+  "cart.selectionTitle": { en: "Your selection", es: "Tu selección" },
+  "cart.selectionSubtitle": {
+    en: "Take a moment to review your picks before checkout",
+    es: "Revisa tu pedido con calma antes de pagar",
+  },
+  "cart.summary": { en: "Order summary", es: "Resumen del pedido" },
+  "cart.shippingNote": {
+    en: "We’ll show shipping options at checkout",
+    es: "El envío se confirma en el checkout",
+  },
+  "cart.total": { en: "Total", es: "Total" },
+  "cart.each": { en: "ea.", es: "c/u" },
+  "cart.proceedCheckout": { en: "Continue to checkout", es: "Continuar al pago" },
+  "cart.sustainability": { en: "Thoughtful, low-waste packaging", es: "Empaque cuidadoso y con menos desperdicio" },
+  "cart.smallBatches": {
+    en: "Small batches, made by hand",
+    es: "Lotes pequeños, hechos a mano",
+  },
+  "cart.promoLabel": { en: "Promo code", es: "Código promocional" },
+  "cart.promoPlaceholder": { en: "Enter your code", es: "Escribe tu código" },
+  "cart.apply": { en: "Apply", es: "Aplicar" },
+  "cart.promoNotAvailable": {
+    en: "Promo codes aren’t available yet — check back soon.",
+    es: "Los códigos promocionales llegarán pronto.",
+  },
+  "cart.empty": { en: "Nothing in your cart yet", es: "Tu carrito está vacío" },
+  "cart.emptyDesc": {
+    en: "Explore the menu and add your favorite tamales.",
+    es: "Explora el menú y agrega tus tamales favoritos.",
+  },
+  "cart.browseTamales": { en: "Browse the menu", es: "Ver el menú" },
+  "cart.goesGreatWith": { en: "You might also like", es: "También te puede gustar" },
   "cart.subtotal": { en: "Subtotal", es: "Subtotal" },
-  "cart.checkout": { en: "Checkout", es: "Finalizar Pedido" },
-  "cart.continueShopping": { en: "Continue Shopping", es: "Seguir comprando" },
+  "cart.shipping": { en: "Shipping", es: "Envío" },
+  "cart.checkout": { en: "Checkout", es: "Pagar" },
+  "cart.continueShopping": { en: "Keep shopping", es: "Seguir comprando" },
+  "cart.close": { en: "Close cart", es: "Cerrar carrito" },
+  "cart.removeItem": { en: "Remove item", es: "Quitar artículo" },
+  "cart.decreaseQty": { en: "Decrease quantity", es: "Menos" },
+  "cart.increaseQty": { en: "Increase quantity", es: "Más" },
+  "cart.addToCart": { en: "Add to cart", es: "Agregar al carrito" },
 
   // ── Auth Modal ──
   "auth.welcomeBack": { en: "Welcome back", es: "Bienvenido" },
@@ -256,21 +313,26 @@ const translations = {
 
   // ── Footer ──
   "footer.desc": {
-    en: "Handmade tamales crafted from generational recipes. Fresh ingredients, delivered to your door in Miami.",
-    es: "Tamales artesanales hechos con recetas de generaciones. Ingredientes frescos, entrega a domicilio en Miami.",
+    en: "Handmade tamales from family recipes — fresh masa, real ingredients, delivered across Miami.",
+    es: "Tamales artesanales con recetas de familia: masa fresca, ingredientes de verdad y entrega en Miami.",
   },
-  "footer.shop": { en: "Shop", es: "Comprar" },
+  "footer.shop": { en: "Shop", es: "Tienda" },
   "footer.savory": { en: "Savory", es: "Salados" },
   "footer.sweet": { en: "Sweet", es: "Dulces" },
   "footer.specials": { en: "Specials", es: "Especiales" },
-  "footer.allTamales": { en: "All Tamales", es: "Todos los Tamales" },
-  "footer.info": { en: "Info", es: "Información" },
-  "footer.aboutUs": { en: "About Us", es: "Nosotros" },
+  "footer.allTamales": { en: "Full menu", es: "Todo el menú" },
+  "footer.info": { en: "Explore", es: "Explora" },
+  "footer.aboutUs": { en: "Our story", es: "Nuestra historia" },
   "footer.menu": { en: "Menu", es: "Menú" },
-  "footer.placeOrder": { en: "Place Order", es: "Hacer Pedido" },
+  "footer.placeOrder": { en: "Order now", es: "Hacer pedido" },
   "footer.contact": { en: "Contact", es: "Contacto" },
+  "footer.whatsapp": { en: "WhatsApp", es: "WhatsApp" },
   "footer.privacy": { en: "Privacy", es: "Privacidad" },
   "footer.terms": { en: "Terms", es: "Términos" },
+  "footer.tagline": {
+    en: "Handcrafted heritage",
+    es: "Herencia hecha a mano",
+  },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

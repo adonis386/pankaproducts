@@ -29,7 +29,7 @@ export default function AnnouncementBar() {
         <button
           onClick={() => setVisible(false)}
           className="absolute right-4 rounded-circle p-1 text-panka-brown-200 transition-colors hover:text-white"
-          aria-label="Close"
+          aria-label={t("announce.close")}
         >
           <HiX className="h-3.5 w-3.5" />
         </button>

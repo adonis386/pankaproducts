@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Sans, Playfair_Display } from "next/font/google";
+import { Noto_Serif, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import AnnouncementBar from "@/components/AnnouncementBar";
 import Navbar from "@/components/Navbar";
@@ -10,23 +10,31 @@ import { AuthProvider } from "@/context/AuthContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { CatalogProvider } from "@/context/CatalogContext";
 
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
+const plusJakarta = Plus_Jakarta_Sans({
+  variable: "--font-plus-jakarta",
   subsets: ["latin"],
   display: "swap",
 });
 
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
+const notoSerif = Noto_Serif({
+  variable: "--font-noto-serif",
   subsets: ["latin"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Panka | Handmade Tamales in Miami",
+  title: "Panka | Artisan tamales in Miami",
   description:
-    "Handmade tamales crafted from traditional recipes with the finest ingredients. Delivery in Miami.",
-  keywords: ["tamales", "handmade", "panka", "mexican food", "miami", "delivery"],
+    "Family recipes, fresh nixtamalized masa, and honest ingredients — tamales made by hand and delivered in Miami.",
+  keywords: [
+    "tamales",
+    "handmade tamales",
+    "Panka",
+    "Mexican food Miami",
+    "tamale delivery",
+    "Oaxacan tamales",
+  ],
+  // Favicons: `src/app/icon.png` and `src/app/apple-icon.png` (synced from `public/assets/ICON.png`)
 };
 
 export default function RootLayout({
@@ -36,7 +44,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${dmSans.variable} ${playfair.variable} font-sans antialiased`}>
+      <body className={`${plusJakarta.variable} ${notoSerif.variable} font-sans antialiased`}>
         <LanguageProvider>
           <AuthProvider>
             <CartProvider>
