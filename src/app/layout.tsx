@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     "tamale delivery",
     "Oaxacan tamales",
   ],
-  // Favicons: `src/app/icon.png` and `src/app/apple-icon.png` (synced from `public/assets/ICON.png`)
+  // Favicon: `src/app/icon.ico` (App Router). Apple touch: `src/app/apple-icon.png`.
 };
 
 export default function RootLayout({
