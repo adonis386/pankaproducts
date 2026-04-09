@@ -232,6 +232,25 @@ const translations = {
   // ── About Page ──
   "about.tag": { en: "Our Story", es: "Nuestra Historia" },
   "about.title": { en: "From abuela's kitchen to the heart of Miami", es: "De la cocina de mamá al corazón de Miami" },
+  "about.fannyHeading": { en: "Meet Fanny", es: "Conoce a Fanny" },
+  "about.fannyRole": { en: "Our owner and founder", es: "Nuestra propietaria y fundadora" },
+  "about.fannyP1": {
+    en: "Fanny’s culinary passion, rooted in the vibrant streets of Lima, Peru, found new expression when she moved to the United States. This transition was more than a change of location; it was a turning point in her culinary story.",
+    es: "La pasión culinaria de Fanny, con raíces en las calles vibrantes de Lima, Perú, cobró nueva forma al mudarse a Estados Unidos. Fue más que un cambio de lugar: un punto de inflexión en su historia culinaria.",
+  },
+  "about.fannyP2": {
+    en: "Surrounded by a melting pot of cultures yet missing the authentic flavors of home, Fanny was inspired to bring the rich, diverse tastes of Latin-American cuisine to a new audience. This inspiration was the catalyst for the creation of Panka, a platform where she could proudly showcase her heritage and her deep-seated love for Peruvian gastronomy to the world.",
+    es: "Rodeada de un crisol de culturas pero con nostalgia de los sabores auténticos de casa, se inspiró a acercar los sabores diversos de la cocina latinoamericana a un nuevo público. Esa inspiración impulsó la creación de Panka: un espacio para mostrar con orgullo su herencia y su amor por la gastronomía peruana.",
+  },
+  "about.fannyImageAlt": {
+    en: "Fanny, chef and founder of Panka",
+    es: "Fanny, chef y fundadora de Panka",
+  },
+  "about.storyImageAlt": {
+    en: "Handmade tamales and Panka kitchen",
+    es: "Tamales artesanales y cocina Panka",
+  },
+  "about.storySectionTitle": { en: "Design: our story", es: "Diseño: la historia" },
   "about.since": { en: "Since 2020", es: "Desde 2020" },
   "about.p1": {
     en: "Panka was born from a family dream: to share with the world the tamales our grandmother made every Sunday. Those tamales that brought the whole family together around the table.",
@@ -242,8 +261,8 @@ const translations = {
     es: "Hoy, cada tamal que sale de nuestra cocina lleva esa misma receta, ese mismo cariño y esa misma dedicación. Usamos ingredientes frescos y naturales, masa nixtamalizada artesanalmente y chiles seleccionados a mano.",
   },
   "about.p3": {
-    en: 'Our name, <strong class="text-panka-brown-500">Panka</strong>, comes from the corn husk that wraps each tamal — a symbol of protection, tradition, and flavor.',
-    es: 'Nuestro nombre, <strong class="text-panka-brown-500">Panka</strong>, viene de la hoja de maíz que envuelve cada tamal — símbolo de protección, tradición y sabor.',
+    en: 'Our name, <strong class="text-primary">Panka</strong>, comes from the corn husk that wraps each tamal — a symbol of protection, tradition, and flavor.',
+    es: 'Nuestro nombre, <strong class="text-primary">Panka</strong>, viene de la hoja de maíz que envuelve cada tamal — símbolo de protección, tradición y sabor.',
   },
   "about.valuesTitle": { en: "Our Values", es: "Nuestros Valores" },
   "about.passion": { en: "Passion", es: "Pasión" },
