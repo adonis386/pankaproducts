@@ -22,10 +22,11 @@ export default function StripeEmbeddedCheckout({
 }: StripeEmbeddedCheckoutProps) {
   const fetchClientSecret = useMemo(
     () => async () => {
+      const itemsPayload = items.map((i) => ({ productId: i.product.id, quantity: i.quantity }));
       const response = await fetch("/api/stripe/embedded-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items, customer }),
+        body: JSON.stringify({ items: itemsPayload, customer }),
       });
 
       const data = (await response.json()) as { clientSecret?: string; error?: string };

@@ -2,6 +2,7 @@ import "server-only";
 
 import { getApps, initializeApp, cert } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
 
 function normalizePrivateKey(raw?: string) {
   if (!raw) return raw;
@@ -32,5 +33,9 @@ function getAdminApp() {
 
 export function adminAuth() {
   return getAuth(getAdminApp());
+}
+
+export function adminDb() {
+  return getFirestore(getAdminApp());
 }
 

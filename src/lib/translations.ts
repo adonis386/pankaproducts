@@ -318,6 +318,28 @@ const translations = {
   "checkout.free": { en: "Free", es: "Gratis" },
   "checkout.total": { en: "Total", es: "Total" },
 
+  // ── Order Success Page ──
+  "success.title": { en: "Order confirmed", es: "Pedido confirmado" },
+  "success.subtitle": {
+    en: "We’ve received your order. We’ll email you the details shortly.",
+    es: "Recibimos tu pedido. En breve te enviamos los detalles por correo.",
+  },
+  "success.loading": { en: "Loading your order…", es: "Cargando tu pedido…" },
+  "success.missingSession": {
+    en: "Missing session id. Please return to the menu and try again.",
+    es: "Falta el identificador del pago. Vuelve al menú e inténtalo de nuevo.",
+  },
+  "success.notFound": {
+    en: "We couldn’t find this order yet. If you just paid, refresh in a few seconds.",
+    es: "Aún no encontramos este pedido. Si acabas de pagar, actualiza en unos segundos.",
+  },
+  "success.orderId": { en: "Order ID", es: "ID del pedido" },
+  "success.deliveryTo": { en: "Delivery to", es: "Entrega a" },
+  "success.items": { en: "Items", es: "Artículos" },
+  "success.total": { en: "Total", es: "Total" },
+  "success.backToMenu": { en: "Back to menu", es: "Volver al menú" },
+  "success.print": { en: "Print", es: "Imprimir" },
+
   // ── Account Page ──
   "account.tag": { en: "Account", es: "Cuenta" },
   "account.hi": { en: "Hi,", es: "Hola," },
