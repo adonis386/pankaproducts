@@ -34,7 +34,7 @@ const translations = {
     es: "Nixtamal al día · Envueltos a mano · Miami",
   },
   "hero.titleLine1": { en: "Tamales that taste", es: "Tamales con sabor" },
-  "hero.titleLine2": { en: "like Sunday", es: "a domingo" },
+  "hero.titleLine2": { en: "like tradition", es: "a tradición" },
   "hero.subtitle": {
     en: "We grind masa from real corn, fill each one with care, and steam them slow — then send them warm to your door anywhere in Miami. Order before 2pm for next-day delivery.",
     es: "Molimos maíz de verdad, rellenamos con mimo y los dejamos al vapor sin prisa; después te los mandamos calientitos donde estés en Miami. Pide antes de las 2pm para recibir al día siguiente.",

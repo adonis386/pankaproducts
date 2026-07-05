@@ -85,7 +85,7 @@ export async function POST(request: Request) {
     const image =
       body.image && body.image.trim()
         ? body.image.trim()
-        : `${getBaseUrl(request)}/tamales/pollo.webp`;
+        : `${getBaseUrl(request)}/tamales/pollo/pollo(3).webp`;
 
     const metadata: Record<string, string> = {
       seedKey,

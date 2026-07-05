@@ -5,6 +5,7 @@ export interface Product {
   description: string;
   price: number;
   image: string;
+  images?: string[];
   category: "salados" | "dulces" | "especiales";
   ingredients: string[];
   isPopular?: boolean;

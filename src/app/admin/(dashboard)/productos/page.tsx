@@ -46,7 +46,7 @@ export default function AdminProductosPage() {
   const [draft, setDraft] = useState({
     name: "",
     price: 5,
-    image: "/tamales/pollo.webp",
+    image: "/tamales/pollo/pollo(3).webp",
     popular: false,
     active: true,
     sort: 9999,
@@ -360,7 +360,7 @@ export default function AdminProductosPage() {
                     <div className="space-y-4 animate-fade-in-top">
                       <div className="flex items-start gap-4">
                         <div className="relative h-24 w-24 overflow-hidden rounded-2xl bg-grey-5">
-                          <Image src={draft.image || "/tamales/pollo.webp"} alt="Preview" fill className="object-cover" />
+                          <Image src={draft.image || "/tamales/pollo/pollo(3).webp"} alt="Preview" fill className="object-cover" />
                         </div>
                         <div className="flex-1">
                           <label className="mb-1.5 block text-sm font-medium text-grey-50">Foto</label>
@@ -499,7 +499,7 @@ export default function AdminProductosPage() {
                             <div className="flex items-start gap-4 min-w-0">
                               <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-grey-5">
                                 <Image
-                                  src={p.image || "/tamales/pollo.webp"}
+                                  src={p.image || "/tamales/pollo/pollo(3).webp"}
                                   alt={p.name}
                                   fill
                                   className="object-cover"

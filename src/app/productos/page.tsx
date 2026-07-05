@@ -77,13 +77,13 @@ export default function ProductosPage() {
           )}
 
           {loading ? (
-            <div className="grid grid-cols-1 gap-5 xsmall:grid-cols-2 small:grid-cols-3 medium:grid-cols-4">
-              {Array.from({ length: 8 }).map((_, idx) => (
+            <div className="grid grid-cols-1 gap-8 xsmall:grid-cols-2 medium:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, idx) => (
                 <ProductCardSkeleton key={idx} />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-5 xsmall:grid-cols-2 small:grid-cols-3 medium:grid-cols-4">
+            <div className="grid grid-cols-1 gap-8 xsmall:grid-cols-2 medium:grid-cols-3">
               {filtered.map((product) => (
                 <ProductCard
                   key={product.id}

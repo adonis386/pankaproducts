@@ -28,10 +28,8 @@ function slugify(input) {
     .replace(/(^-|-$)/g, "");
 }
 
-function imageUrlFor(filename) {
-  // Serve local file from Next `public/`.
-  // We encode to safely handle spaces/special chars.
-  return `/tamales/${encodeURIComponent(filename)}`;
+function imageUrlFor(relativePath) {
+  return `/tamales/${relativePath.split("/").map(encodeURIComponent).join("/")}`;
 }
 
 async function main() {
@@ -43,25 +41,16 @@ async function main() {
 
   // Map Product name (seed slug) -> local filename
   const imageBySeedKey = {
-    [slugify("pollo")]: "pollo.webp",
-    [slugify("Vegano")]: "tamal vegano.jpeg",
-    [slugify("Tamalito verde")]: "tamalitos-verdes.webp",
-    [slugify("Humita")]: "humita.jpg",
-    [slugify("salchicha wachana")]: "salchicha-huachana.webp",
-    [slugify("jamoncillos del pais")]: "jamoncillo-pais.jpg",
+    [slugify("pollo")]: "pollo/pollo(3).webp",
+    [slugify("Vegano")]: "vegano/vegano(2).webp",
+    [slugify("Tamalito verde")]: "tamalito_verde/tamalito_verde (2).webp",
+    [slugify("Humita")]: "humita/humita (2).webp",
+    [slugify("salchicha wachana")]: "salchicha_huachana/Salchicha_Huachana(1).webp",
+    [slugify("jamoncillos del pais")]: "jamon_del_pais/jamon_del_pais(2).webp",
+    [slugify("Tamal de cerdo")]: "tamal_cerdo/Tamal_de_cerdo(2).webp",
     [slugify("pan francés")]: "pan-frances.webp",
-    // chicharrón filename has a special character; we'll resolve it dynamically below
-    [slugify("Chicharron instantaneo")]: "CHICHARRON_RESOLVE_BY_PATTERN",
+    [slugify("Chicharron instantaneo")]: "chicharron/chicharron.webp",
   };
-
-  const tamalesDir = path.join(process.cwd(), "public", "tamales");
-  const tamalesFiles = fs.existsSync(tamalesDir)
-    ? fs.readdirSync(tamalesDir)
-    : [];
-  const chicharronFile = tamalesFiles.find((n) => n.includes("rinds-e1630513624548.jpg"));
-  if (chicharronFile) {
-    imageBySeedKey[slugify("Chicharron instantaneo")] = chicharronFile;
-  }
 
   const activeProducts = await stripe.products.list({ active: true, limit: 100 });
 

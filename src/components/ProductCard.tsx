@@ -32,15 +32,16 @@ export default function ProductCard({ product, compact, onSelect }: ProductCardP
         compact ? "min-w-[220px] max-w-[220px]" : ""
       } ${onSelect ? "cursor-pointer" : ""}`}
     >
-      <div className={`relative overflow-hidden rounded-[1.5rem] m-4 ${compact ? "h-44" : "h-56"}`}>
+      <div className={`relative w-full shrink-0 overflow-hidden bg-white ${compact ? "h-44" : "aspect-[4/3]"}`}>
         <Image
           src={product.image}
           alt={product.name}
           fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          sizes={compact ? "220px" : "(max-width: 640px) 100vw, 33vw"}
+          className="object-contain transition-transform duration-500 group-hover:scale-[1.02]"
         />
         {product.isPopular && (
-          <span className="absolute left-3 top-3 rounded-full bg-surface/80 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary backdrop-blur-sm">
+          <span className="absolute left-4 top-4 rounded-full bg-surface/80 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary backdrop-blur-sm">
             {t("product.popular")}
           </span>
         )}
@@ -49,14 +50,14 @@ export default function ProductCard({ product, compact, onSelect }: ProductCardP
             e.stopPropagation();
             addItem(product);
           }}
-          className="absolute bottom-3 right-3 flex h-10 w-10 items-center justify-center rounded-xl bg-surface/85 text-on-surface shadow-[var(--shadow-editorial)] backdrop-blur-sm transition-all hover:bg-primary hover:text-on-primary active:scale-95"
+          className="absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-xl bg-surface/85 text-on-surface shadow-[var(--shadow-editorial)] backdrop-blur-sm transition-all hover:bg-primary hover:text-on-primary active:scale-95"
           aria-label={t("product.addToCart")}
         >
           <HiPlus className="h-4 w-4" />
         </button>
       </div>
 
-      <div className={`flex flex-1 flex-col px-8 pb-7 ${compact ? "pt-0" : "pt-0"}`}>
+      <div className={`flex flex-1 flex-col ${compact ? "px-4 pb-4 pt-3" : "px-6 pb-6 pt-5"}`}>
         <div className="mb-2 flex items-start justify-between gap-4">
           <h3 className={`font-heading leading-snug ${compact ? "text-lg" : "text-2xl"} font-bold text-on-surface`}>
             {product.name}
@@ -79,7 +80,7 @@ export default function ProductCard({ product, compact, onSelect }: ProductCardP
           </div>
         )}
 
-        {!compact && <p className="mb-6 text-sm leading-relaxed text-tertiary line-clamp-2">{product.description}</p>}
+        {!compact && <p className="mb-5 text-sm leading-relaxed text-tertiary line-clamp-2">{product.description}</p>}
 
         {!compact && (
           <button

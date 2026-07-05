@@ -46,6 +46,7 @@ async function main() {
     { name: "Humita", popular: false },
     { name: "salchicha wachana", popular: false },
     { name: "jamoncillos del pais", popular: false },
+    { name: "Tamal de cerdo", popular: false },
     { name: "pan francés", popular: false },
     { name: "Chicharron instantaneo", popular: false },
   ];
