@@ -1,46 +1,19 @@
 "use client";
 
-import { useMemo } from "react";
 import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-import { CartItem, CustomerInfo } from "@/lib/types";
 
 interface StripeEmbeddedCheckoutProps {
-  items: CartItem[];
-  customer: CustomerInfo;
+  clientSecret: string;
   onComplete: () => void;
-  onError?: (message: string) => void;
 }
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "");
 
 export default function StripeEmbeddedCheckout({
-  items,
-  customer,
+  clientSecret,
   onComplete,
-  onError,
 }: StripeEmbeddedCheckoutProps) {
-  const fetchClientSecret = useMemo(
-    () => async () => {
-      const itemsPayload = items.map((i) => ({ productId: i.product.id, quantity: i.quantity }));
-      const response = await fetch("/api/stripe/embedded-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: itemsPayload, customer }),
-      });
-
-      const data = (await response.json()) as { clientSecret?: string; error?: string };
-      if (!response.ok || !data.clientSecret) {
-        const message = data.error || "Unable to initialize Stripe checkout.";
-        onError?.(message);
-        throw new Error(message);
-      }
-
-      return data.clientSecret;
-    },
-    [items, customer, onError]
-  );
-
   if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
     return (
       <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -53,7 +26,7 @@ export default function StripeEmbeddedCheckout({
     <EmbeddedCheckoutProvider
       stripe={stripePromise}
       options={{
-        fetchClientSecret,
+        clientSecret,
         onComplete,
       }}
     >

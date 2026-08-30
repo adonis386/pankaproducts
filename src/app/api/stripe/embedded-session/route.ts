@@ -16,6 +16,7 @@ interface CheckoutPayload {
     city: string;
     notes?: string;
   };
+  firebaseUid?: string;
 }
 
 async function getPriceIdForProduct(productId: string) {
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
     }
 
     const body = (await request.json()) as CheckoutPayload;
-    const { items, customer } = body;
+    const { items, customer, firebaseUid } = body;
 
     if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: "Cart is empty." }, { status: 400 });
@@ -82,15 +83,17 @@ export async function POST(request: Request) {
       return_url: `${new URL(request.url).origin}/pedido-exitoso?session_id={CHECKOUT_SESSION_ID}`,
       metadata: {
         customer_name: customer.name,
+        customer_email: customer.email,
         customer_phone: customer.phone,
         customer_address: customer.address,
         customer_city: customer.city,
         customer_notes: customer.notes || "",
+        firebase_uid: firebaseUid || "",
         source: "panka-web",
       },
     });
 
-    return NextResponse.json({ clientSecret: session.client_secret });
+    return NextResponse.json({ clientSecret: session.client_secret, sessionId: session.id });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to create checkout session.";
     return NextResponse.json({ error: message }, { status: 500 });

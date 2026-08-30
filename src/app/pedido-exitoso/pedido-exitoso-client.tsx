@@ -56,11 +56,21 @@ export default function PedidoExitosoClient() {
       }
       setLoading(true);
       setError("");
+      const maxAttempts = 5;
       try {
-        const res = await fetch(endpoint, { cache: "no-store" });
-        const data = (await res.json()) as SuccessOrder & { error?: string };
-        if (!res.ok) throw new Error(data.error || "Order not found.");
-        if (!cancelled) setOrder(data);
+        for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+          const res = await fetch(endpoint, { cache: "no-store" });
+          const data = (await res.json()) as SuccessOrder & { error?: string };
+          if (res.ok && data.id) {
+            if (!cancelled) setOrder(data);
+            return;
+          }
+          if (attempt < maxAttempts - 1) {
+            await new Promise((resolve) => window.setTimeout(resolve, 1200));
+          } else {
+            throw new Error(data.error || "Order not found.");
+          }
+        }
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : "Failed to load order.");
       } finally {

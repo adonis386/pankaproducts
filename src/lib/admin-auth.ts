@@ -2,7 +2,7 @@ import "server-only";
 
 import { adminAuth } from "@/lib/firebase-admin";
 
-export async function requireAdminFromRequest(request: Request) {
+async function verifyBearer(request: Request) {
   const header = request.headers.get("authorization") || "";
   const token = header.startsWith("Bearer ") ? header.slice("Bearer ".length) : "";
 
@@ -10,10 +10,17 @@ export async function requireAdminFromRequest(request: Request) {
     throw new Error("Missing auth token.");
   }
 
-  const decoded = await adminAuth().verifyIdToken(token);
-  const email = decoded.email || "";
+  return adminAuth().verifyIdToken(token);
+}
 
-  // Strong check: custom claim set via Firebase Admin SDK.
+export async function requireUserFromRequest(request: Request) {
+  const decoded = await verifyBearer(request);
+  return { uid: decoded.uid, email: decoded.email || "" };
+}
+
+export async function requireAdminFromRequest(request: Request) {
+  const decoded = await verifyBearer(request);
+  const email = decoded.email || "";
   const hasAdminClaim = Boolean((decoded as Record<string, unknown>).admin);
 
   const allowedRaw = process.env.ADMIN_EMAILS || "";
@@ -22,7 +29,6 @@ export async function requireAdminFromRequest(request: Request) {
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
 
-  // Backward compatible: if ADMIN_EMAILS is set, enforce it too.
   const passesEmailAllowList = allowed.length === 0 || allowed.includes(email.toLowerCase());
 
   if (!email || !passesEmailAllowList || !hasAdminClaim) {
@@ -31,4 +37,3 @@ export async function requireAdminFromRequest(request: Request) {
 
   return { uid: decoded.uid, email };
 }
-

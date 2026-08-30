@@ -1,13 +1,60 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { auth } from "@/lib/firebase";
+import type { PublicOrder } from "@/lib/order-types";
 import Link from "next/link";
 import { HiOutlineUser, HiOutlineLogout } from "react-icons/hi";
+
+function formatMoney(amount: number, currency: string) {
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: currency.toUpperCase(),
+    }).format(amount);
+  } catch {
+    return `$${amount.toFixed(2)}`;
+  }
+}
 
 export default function CuentaPage() {
   const { user, logout, loading } = useAuth();
   const { t } = useLanguage();
+  const [orders, setOrders] = useState<PublicOrder[]>([]);
+  const [ordersError, setOrdersError] = useState("");
+  const [ordersLoading, setOrdersLoading] = useState(false);
+
+  useEffect(() => {
+    if (!user) {
+      setOrders([]);
+      return;
+    }
+    let cancelled = false;
+    const run = async () => {
+      setOrdersLoading(true);
+      setOrdersError("");
+      try {
+        if (!auth?.currentUser) throw new Error("No authenticated user.");
+        const token = await auth.currentUser.getIdToken();
+        const res = await fetch("/api/orders/mine", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = (await res.json()) as { orders?: PublicOrder[]; error?: string };
+        if (!res.ok) throw new Error(data.error || "Failed to load orders.");
+        if (!cancelled) setOrders(Array.isArray(data.orders) ? data.orders : []);
+      } catch (e) {
+        if (!cancelled) setOrdersError(e instanceof Error ? e.message : "Failed to load orders.");
+      } finally {
+        if (!cancelled) setOrdersLoading(false);
+      }
+    };
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.uid]);
 
   if (loading) {
     return (
@@ -59,12 +106,36 @@ export default function CuentaPage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-grey-10 bg-white p-6">
+            <div className="rounded-2xl border border-grey-10 bg-white p-6 small:col-span-2">
               <h2 className="mb-4 text-base font-bold text-grey-80">{t("account.myOrders")}</h2>
-              <p className="text-sm text-grey-40">{t("account.noOrders")}</p>
-              <Link href="/productos" className="mt-4 inline-block rounded-xl bg-grey-5 px-5 py-2.5 text-sm font-semibold text-grey-60 transition-colors hover:bg-grey-10">
-                {t("cart.browseTamales")}
-              </Link>
+              {ordersLoading ? (
+                <p className="text-sm text-grey-40">{t("account.loadingOrders")}</p>
+              ) : ordersError ? (
+                <p className="text-sm text-grey-40">{ordersError}</p>
+              ) : orders.length === 0 ? (
+                <>
+                  <p className="text-sm text-grey-40">{t("account.noOrders")}</p>
+                  <Link href="/productos" className="mt-4 inline-block rounded-xl bg-grey-5 px-5 py-2.5 text-sm font-semibold text-grey-60 transition-colors hover:bg-grey-10">
+                    {t("cart.browseTamales")}
+                  </Link>
+                </>
+              ) : (
+                <ul className="space-y-4">
+                  {orders.map((order) => (
+                    <li key={order.id} className="rounded-xl bg-grey-5 px-4 py-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold text-grey-80">
+                            {order.items.map((item) => `${item.quantity}× ${item.name}`).join(", ")}
+                          </p>
+                          <p className="text-xs uppercase tracking-wider text-grey-40">{order.status}</p>
+                        </div>
+                        <p className="text-sm font-bold text-grey-80">{formatMoney(order.total, order.currency)}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             <div className="rounded-2xl border border-grey-10 bg-white p-6">

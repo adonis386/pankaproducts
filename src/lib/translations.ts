@@ -350,6 +350,7 @@ const translations = {
   "account.noName": { en: "No name set", es: "Sin nombre" },
   "account.myOrders": { en: "My Orders", es: "Mis Pedidos" },
   "account.noOrders": { en: "No orders yet. Place your first one!", es: "Aún no tienes pedidos. ¡Haz tu primer orden!" },
+  "account.loadingOrders": { en: "Loading your orders…", es: "Cargando tus pedidos…" },
   "account.settings": { en: "Settings", es: "Configuración" },
 
   // ── Footer ──

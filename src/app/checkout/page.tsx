@@ -3,20 +3,22 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { CustomerInfo } from "@/lib/types";
-import { HiOutlineCheckCircle, HiArrowLeft } from "react-icons/hi";
+import { HiArrowLeft } from "react-icons/hi";
 import StripeEmbeddedCheckout from "@/components/StripeEmbeddedCheckout";
 
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
   const { user } = useAuth();
   const { t } = useLanguage();
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [orderPlaced, setOrderPlaced] = useState(false);
-  const [showStripeCheckout, setShowStripeCheckout] = useState(false);
+  const [clientSecret, setClientSecret] = useState("");
+  const [sessionId, setSessionId] = useState("");
   const [checkoutError, setCheckoutError] = useState("");
   const [form, setForm] = useState<CustomerInfo>({
     name: user?.displayName || "",
@@ -27,57 +29,40 @@ export default function CheckoutPage() {
     notes: "",
   });
 
-  const currentStep = orderPlaced ? 2 : showStripeCheckout ? 1 : 0;
+  const showStripeCheckout = Boolean(clientSecret && sessionId);
+  const currentStep = showStripeCheckout ? 1 : 0;
   const steps = [t("checkout.stepDelivery"), t("checkout.stepPayment"), t("checkout.stepConfirmation")];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setCheckoutError("");
     setIsSubmitting(true);
-    setShowStripeCheckout(true);
-    setIsSubmitting(false);
+    try {
+      const response = await fetch("/api/stripe/embedded-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: items.map((item) => ({ productId: item.product.id, quantity: item.quantity })),
+          customer: form,
+          firebaseUid: user?.uid || "",
+        }),
+      });
+      const data = (await response.json()) as { clientSecret?: string; sessionId?: string; error?: string };
+      if (!response.ok || !data.clientSecret || !data.sessionId) {
+        throw new Error(data.error || "Unable to initialize Stripe checkout.");
+      }
+      setClientSecret(data.clientSecret);
+      setSessionId(data.sessionId);
+    } catch (err) {
+      setCheckoutError(err instanceof Error ? err.message : "Unable to initialize Stripe checkout.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
-
-  if (orderPlaced) {
-    return (
-      <section className="flex min-h-[70vh] items-center justify-center py-20">
-        <div className="mx-auto max-w-sm px-6 text-center animate-scale-in">
-          <HiOutlineCheckCircle className="mx-auto mb-5 h-16 w-16 text-panka-green-500" />
-          <div className="mb-6">
-            <ol className="flex items-center justify-center gap-4">
-              {steps.map((label, idx) => (
-                <li key={label} className="flex items-center gap-2">
-                  <span
-                    className={`flex h-10 w-10 items-center justify-center rounded-xl border text-sm font-bold ${
-                      idx <= currentStep
-                        ? "border-panka-green-200 bg-panka-green-50 text-panka-green-600"
-                        : "border-grey-10 bg-white text-grey-40"
-                    }`}
-                  >
-                    {idx < currentStep ? "✓" : idx + 1}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </div>
-          <h1 className="mb-2 font-heading text-3xl font-bold text-panka-brown-500">
-            {t("checkout.orderConfirmed")}
-          </h1>
-          <p className="mb-8 text-base text-grey-50">
-            {t("checkout.thankYou")} {form.name}. {t("checkout.confirmationEmail")}{" "}
-            <strong className="text-grey-70">{form.email}</strong>.
-          </p>
-          <Link href="/" className="inline-block rounded-xl bg-panka-brown-500 px-8 py-3.5 text-base font-bold text-white transition-all hover:bg-panka-brown-600">
-            {t("checkout.backHome")}
-          </Link>
-        </div>
-      </section>
-    );
-  }
 
   if (items.length === 0) {
     return (
@@ -182,13 +167,11 @@ export default function CheckoutPage() {
                 {showStripeCheckout && (
                   <div className="mt-6">
                     <StripeEmbeddedCheckout
-                      items={items}
-                      customer={form}
+                      clientSecret={clientSecret}
                       onComplete={() => {
                         clearCart();
-                        setOrderPlaced(true);
+                        router.push(`/pedido-exitoso?session_id=${encodeURIComponent(sessionId)}`);
                       }}
-                      onError={(message) => setCheckoutError(message)}
                     />
                   </div>
                 )}

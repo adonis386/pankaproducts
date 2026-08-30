@@ -5,8 +5,6 @@ import Link from "next/link";
 import {
   HiOutlineArrowRight,
   HiOutlineCalendar,
-  HiOutlineChevronLeft,
-  HiOutlineChevronRight,
   HiOutlineCurrencyDollar,
   HiOutlineDotsVertical,
   HiOutlinePlus,
@@ -17,6 +15,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
 import { auth } from "@/lib/firebase";
+import type { PublicOrder } from "@/lib/order-types";
 
 async function getIdTokenOrThrow() {
   if (!auth?.currentUser) throw new Error("No authenticated user.");
@@ -33,6 +32,7 @@ export default function AdminHomePage() {
   const [error, setError] = useState("");
   const [productCount, setProductCount] = useState<number | null>(null);
   const [topSeller, setTopSeller] = useState<string>("—");
+  const [orders, setOrders] = useState<PublicOrder[]>([]);
 
   useEffect(() => {
     const check = async () => {
@@ -76,6 +76,14 @@ export default function AdminHomePage() {
         const popular = data.products.find((p) => p.popular);
         const name = popular?.name || data.products[0]?.name;
         if (name) setTopSeller(name);
+
+        const ordersRes = await fetch("/admin/api/orders", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const ordersData = (await ordersRes.json()) as { orders?: PublicOrder[] };
+        if (ordersRes.ok && Array.isArray(ordersData.orders)) {
+          setOrders(ordersData.orders);
+        }
       } catch {
         /* optional metrics */
       }
@@ -171,8 +179,15 @@ export default function AdminHomePage() {
           </div>
           <div className="mt-6">
             <p className="text-sm font-bold uppercase tracking-widest text-tertiary">Total Revenue</p>
-            <h2 className="mt-1 font-heading text-3xl font-bold">—</h2>
-            <p className="mt-1 text-xs text-on-surface-variant">Connect billing to show totals</p>
+            <h2 className="mt-1 font-heading text-3xl font-bold">
+              {`$${orders
+                .filter((o) => o.status !== "cancelled" && o.status !== "failed")
+                .reduce((sum, o) => sum + o.total, 0)
+                .toFixed(2)}`}
+            </h2>
+            <p className="mt-1 text-xs text-on-surface-variant">
+              {orders.length} paid order{orders.length === 1 ? "" : "s"}
+            </p>
           </div>
         </div>
 
@@ -209,12 +224,12 @@ export default function AdminHomePage() {
         <div className="flex flex-col gap-4 border-b border-outline-variant/10 bg-surface-container-low/50 p-8 small:flex-row small:items-center small:justify-between">
           <div>
             <h3 className="font-heading text-2xl font-bold">Recent Orders</h3>
-            <p className="text-sm text-tertiary">Sample preview — live orders when connected</p>
+            <p className="text-sm text-tertiary">Pedidos reales desde Stripe + Firestore</p>
           </div>
-          <span className="inline-flex items-center gap-1 text-sm font-bold text-primary/80">
+          <Link href="/admin/pedidos" className="inline-flex items-center gap-1 text-sm font-bold text-primary/80">
             View All Orders
             <HiOutlineArrowRight className="h-4 w-4" aria-hidden />
-          </span>
+          </Link>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left">
@@ -228,87 +243,92 @@ export default function AdminHomePage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/10">
-              {[
-                { id: "#PK-9231", initials: "AM", name: "Adriana Morales", status: "Delivered", tone: "ok" as const, total: "$124.00" },
-                { id: "#PK-9232", initials: "RC", name: "Ricardo Castillo", status: "Preparing", tone: "prep" as const, total: "$48.50" },
-                { id: "#PK-9233", initials: "LH", name: "Lucia Herrera", status: "New Order", tone: "new" as const, total: "$92.15" },
-                { id: "#PK-9234", initials: "GT", name: "Gabriel Torres", status: "Cancelled", tone: "bad" as const, total: "$15.00" },
-              ].map((row) => (
-                <tr key={row.id} className="group transition-colors hover:bg-surface-container-low">
-                  <td className="px-8 py-5 font-mono text-sm text-on-surface-variant">{row.id}</td>
-                  <td className="px-8 py-5">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-container-highest text-xs font-bold">
-                        {row.initials}
-                      </div>
-                      <span className="font-semibold">{row.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-8 py-5">
-                    {row.tone === "ok" && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-panka-green-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-panka-green-600">
-                        <span className="h-1.5 w-1.5 rounded-full bg-panka-green-500" />
-                        {row.status}
-                      </span>
-                    )}
-                    {row.tone === "prep" && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-secondary-container/50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-secondary">
-                        <span className="h-1.5 w-1.5 rounded-full bg-secondary" />
-                        {row.status}
-                      </span>
-                    )}
-                    {row.tone === "new" && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
-                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
-                        {row.status}
-                      </span>
-                    )}
-                    {row.tone === "bad" && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-error/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-error">
-                        <span className="h-1.5 w-1.5 rounded-full bg-error" />
-                        {row.status}
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-8 py-5 text-right font-bold">{row.total}</td>
-                  <td className="px-8 py-5 text-center">
-                    <button
-                      type="button"
-                      className="rounded-lg p-2 opacity-0 transition-opacity hover:bg-surface-container group-hover:opacity-100"
-                      aria-label="More"
-                    >
-                      <HiOutlineDotsVertical className="text-on-surface-variant" />
-                    </button>
+              {orders.slice(0, 6).length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-8 py-10 text-sm text-tertiary">
+                    Aún no hay pedidos. Cuando un cliente pague, aparece aquí.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                orders.slice(0, 6).map((row) => {
+                  const initials = (row.customer.name || row.customer.email || "P")
+                    .split(/\s+/)
+                    .map((w) => w[0])
+                    .join("")
+                    .slice(0, 2)
+                    .toUpperCase();
+                  const tone =
+                    row.status === "delivered"
+                      ? "ok"
+                      : row.status === "preparing"
+                        ? "prep"
+                        : row.status === "cancelled" || row.status === "failed"
+                          ? "bad"
+                          : "new";
+                  return (
+                    <tr key={row.id} className="group transition-colors hover:bg-surface-container-low">
+                      <td className="px-8 py-5 font-mono text-sm text-on-surface-variant">{row.id.slice(0, 18)}…</td>
+                      <td className="px-8 py-5">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-container-highest text-xs font-bold">
+                            {initials}
+                          </div>
+                          <span className="font-semibold">{row.customer.name || row.customer.email || "—"}</span>
+                        </div>
+                      </td>
+                      <td className="px-8 py-5">
+                        {tone === "ok" && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-panka-green-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-panka-green-600">
+                            <span className="h-1.5 w-1.5 rounded-full bg-panka-green-500" />
+                            {row.status}
+                          </span>
+                        )}
+                        {tone === "prep" && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-secondary-container/50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-secondary">
+                            <span className="h-1.5 w-1.5 rounded-full bg-secondary" />
+                            {row.status}
+                          </span>
+                        )}
+                        {tone === "new" && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
+                            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+                            {row.status}
+                          </span>
+                        )}
+                        {tone === "bad" && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-error/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-error">
+                            <span className="h-1.5 w-1.5 rounded-full bg-error" />
+                            {row.status}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-8 py-5 text-right font-bold">${row.total.toFixed(2)}</td>
+                      <td className="px-8 py-5 text-center">
+                        <Link
+                          href="/admin/pedidos"
+                          className="rounded-lg p-2 inline-flex hover:bg-surface-container"
+                          aria-label="Open orders"
+                        >
+                          <HiOutlineDotsVertical className="text-on-surface-variant" />
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
         <div className="flex flex-col gap-4 border-t border-outline-variant/10 p-8 small:flex-row small:items-center small:justify-between">
-          <p className="text-xs font-medium text-tertiary">Showing 4 of 248 orders (demo)</p>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-outline-variant/30 transition-colors hover:bg-surface-container-low"
-              aria-label="Previous page"
-            >
-              <HiOutlineChevronLeft className="h-4 w-4" />
-            </button>
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-xs font-bold text-on-primary">
-              1
-            </span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-outline-variant/30 text-xs font-bold">
-              2
-            </span>
-            <button
-              type="button"
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-outline-variant/30 transition-colors hover:bg-surface-container-low"
-              aria-label="Next page"
-            >
-              <HiOutlineChevronRight className="h-4 w-4" />
-            </button>
-          </div>
+          <p className="text-xs font-medium text-tertiary">
+            Showing {Math.min(6, orders.length)} of {orders.length} orders
+          </p>
+          <Link
+            href="/admin/pedidos"
+            className="rounded-lg bg-surface-container-high px-4 py-2 text-xs font-bold hover:bg-surface-variant"
+          >
+            Open orders
+          </Link>
         </div>
       </section>
 
@@ -316,34 +336,23 @@ export default function AdminHomePage() {
         <div className="flex-1 rounded-[2rem] border border-secondary-fixed-dim/30 bg-secondary-fixed-dim/20 p-8">
           <div className="mb-4 flex items-center gap-4">
             <HiOutlineSparkles className="h-6 w-6 text-secondary" aria-hidden />
-            <h4 className="text-lg font-bold">Inventory Insight</h4>
+            <h4 className="text-lg font-bold">Kitchen queue</h4>
           </div>
           <p className="text-sm leading-relaxed text-on-secondary-fixed-variant">
-            Banana leaf stocks are currently high. Ideal time to promote Oaxacan-style tamales for the upcoming
-            weekend rush.
+            {orders.filter((o) => o.status === "confirmed" || o.status === "preparing").length} order(s)
+            waiting or in prep. Use Menu Management for the catalog; use Orders for kitchen status.
           </p>
-          <button type="button" className="mt-6 text-sm font-bold text-secondary underline underline-offset-4">
-            Create Promotion
-          </button>
+          <Link href="/admin/pedidos" className="mt-6 inline-block text-sm font-bold text-secondary underline underline-offset-4">
+            Open orders
+          </Link>
         </div>
         <div className="w-full rounded-[2rem] bg-surface-container-high p-8 md:w-1/3">
-          <h4 className="mb-6 font-heading text-lg font-bold">System Health</h4>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Online Orders</span>
-              <span className="flex items-center gap-1 text-xs font-bold text-primary">
-                Active
-                <span className="h-2 w-2 rounded-full bg-primary" />
-              </span>
-            </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-outline-variant/30">
-              <div className="h-full w-[98%] rounded-full bg-primary" />
-            </div>
-            <div className="flex items-center justify-between pt-2">
-              <span className="text-sm">Server Latency</span>
-              <span className="text-xs font-bold text-primary">24ms</span>
-            </div>
-          </div>
+          <h4 className="mb-6 font-heading text-lg font-bold">Last payment</h4>
+          <p className="text-sm text-tertiary">
+            {orders[0]
+              ? `${orders[0].customer.name || orders[0].customer.email} · $${orders[0].total.toFixed(2)}`
+              : "No payments yet."}
+          </p>
         </div>
       </footer>
     </>
