@@ -106,7 +106,12 @@ export default function Home() {
                 </a>
               </div>
               <div className="relative min-h-[250px]">
-                <Image src="/hero_3.jpg" alt="Tamales" fill className="object-cover" />
+                <Image
+                  src="/hero_3.jpg"
+                  alt={t("hero.carouselSlide1Alt")}
+                  fill
+                  className="object-cover"
+                />
                 <div className="absolute inset-0 bg-gradient-to-r from-surface-container via-surface-container/30 to-transparent small:from-surface-container/70" />
                 <div className="pointer-events-none absolute -bottom-10 -left-10 h-40 w-40 rounded-circle bg-secondary-container/35 blur-3xl" />
                 <div className="pointer-events-none absolute -top-10 -right-10 h-52 w-52 rounded-circle bg-primary-container/25 blur-3xl" />

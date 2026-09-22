@@ -370,10 +370,27 @@ const translations = {
   "footer.contact": { en: "Contact", es: "Contacto" },
   "footer.whatsapp": { en: "WhatsApp", es: "WhatsApp" },
   "footer.privacy": { en: "Privacy", es: "Privacidad" },
+  "footer.cookies": { en: "Cookies", es: "Cookies" },
+  "footer.accessibility": { en: "Accessibility", es: "Accesibilidad" },
   "footer.terms": { en: "Terms", es: "Términos" },
   "footer.tagline": {
     en: "Handcrafted heritage",
     es: "Herencia hecha a mano",
+  },
+
+  // ── Legal / cookies banner ──
+  "legal.lastUpdated": { en: "Last updated", es: "Última actualización" },
+  "cookies.title": { en: "Cookies on Panka", es: "Cookies en Panka" },
+  "cookies.body": {
+    en: "We use essential cookies for your cart, language, login, and secure checkout. Optional analytics stay off unless you accept.",
+    es: "Usamos cookies esenciales para carrito, idioma, sesión y checkout seguro. La analítica opcional permanece apagada salvo que aceptes.",
+  },
+  "cookies.learnMore": { en: "Cookie policy", es: "Política de cookies" },
+  "cookies.essential": { en: "Essential only", es: "Solo esenciales" },
+  "cookies.accept": { en: "Accept all", es: "Aceptar todo" },
+  "a11y.skipToContent": {
+    en: "Skip to main content",
+    es: "Saltar al contenido principal",
   },
 } as const;
 

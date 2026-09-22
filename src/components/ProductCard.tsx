@@ -5,6 +5,7 @@ import { HiPlus } from "react-icons/hi";
 import { Product } from "@/lib/types";
 import { useCart } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { getProductImageAlt } from "@/lib/product-alt";
 
 interface ProductCardProps {
   product: Product;
@@ -14,7 +15,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, compact, onSelect }: ProductCardProps) {
   const { addItem } = useCart();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
 
   const chips =
     !compact && Array.isArray(product.ingredients) ? product.ingredients.filter(Boolean).slice(0, 2) : [];
@@ -35,7 +36,7 @@ export default function ProductCard({ product, compact, onSelect }: ProductCardP
       <div className={`relative w-full shrink-0 overflow-hidden bg-white ${compact ? "h-44" : "aspect-[4/3]"}`}>
         <Image
           src={product.image}
-          alt={product.name}
+          alt={getProductImageAlt(product, locale)}
           fill
           sizes={compact ? "220px" : "(max-width: 640px) 100vw, 33vw"}
           className="object-contain transition-transform duration-500 group-hover:scale-[1.02]"

@@ -7,30 +7,39 @@ import { upsertOrderFromSession } from "@/lib/stripe-orders";
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
+  if (!isStripeConfigured || !stripe) {
+    return NextResponse.json(
+      { error: "Stripe is not configured. Add STRIPE_SECRET_KEY." },
+      { status: 500 }
+    );
+  }
+
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    return NextResponse.json(
+      { error: "STRIPE_WEBHOOK_SECRET is missing." },
+      { status: 500 }
+    );
+  }
+
+  const signature = (await headers()).get("stripe-signature");
+  if (!signature) {
+    return NextResponse.json({ error: "Missing stripe-signature header." }, { status: 400 });
+  }
+
+  // Signature is computed over the exact raw body bytes — never use request.json().
+  const body = await request.text();
+
+  let event: Stripe.Event;
   try {
-    if (!isStripeConfigured || !stripe) {
-      return NextResponse.json(
-        { error: "Stripe is not configured. Add STRIPE_SECRET_KEY." },
-        { status: 500 }
-      );
-    }
+    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Invalid Stripe webhook signature.";
+    return NextResponse.json({ error: message }, { status: 400 });
+  }
 
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-    if (!webhookSecret) {
-      return NextResponse.json(
-        { error: "STRIPE_WEBHOOK_SECRET is missing." },
-        { status: 500 }
-      );
-    }
-
-    const signature = (await headers()).get("stripe-signature");
-    if (!signature) {
-      return NextResponse.json({ error: "Missing stripe-signature header." }, { status: 400 });
-    }
-
-    const body = await request.text();
-    const event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-
+  try {
     switch (event.type) {
       case "checkout.session.completed":
       case "checkout.session.async_payment_succeeded": {
@@ -44,8 +53,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ received: true });
   } catch (error) {
+    // 500 so Stripe retries at-least-once delivery after transient DB/server failures.
     const message =
       error instanceof Error ? error.message : "Failed to process Stripe webhook event.";
-    return NextResponse.json({ error: message }, { status: 400 });
+    console.error("[stripe/webhook]", event.type, event.id, message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

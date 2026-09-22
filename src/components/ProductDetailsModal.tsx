@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { useCart } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { getProductImages } from "@/lib/product-images";
+import { getProductImageAlt } from "@/lib/product-alt";
 import { Product } from "@/lib/types";
 import ProductImageCarousel from "@/components/ProductImageCarousel";
 
@@ -18,7 +19,7 @@ interface ProductDetailsModalProps {
 
 export default function ProductDetailsModal({ product, isOpen, onClose }: ProductDetailsModalProps) {
   const { addItem } = useCart();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
@@ -42,6 +43,7 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
         className="fixed inset-0 z-[70] flex items-center justify-center p-4 pointer-events-none"
         aria-modal="true"
         role="dialog"
+        aria-label={product.name}
       >
         <motion.div
           initial={{ opacity: 0, y: 16, scale: 0.98 }}
@@ -52,7 +54,7 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
           <button
             onClick={onClose}
             className="absolute right-4 top-4 z-20 rounded-xl bg-white/90 p-2 text-grey-50 shadow-sm transition-colors hover:bg-grey-5 hover:text-grey-70"
-            aria-label="Close"
+            aria-label={t("nav.closeMenu")}
           >
             <HiOutlineX className="h-5 w-5" />
           </button>
@@ -61,7 +63,7 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
             <div className="grid grid-cols-1 gap-4 p-5 small:grid-cols-2 small:gap-6 small:p-6">
               <ProductImageCarousel
                 images={images}
-                alt={product.name}
+                alt={getProductImageAlt(product, locale)}
                 fit="contain"
                 className="aspect-[4/3] w-full shrink-0 bg-surface-container small:aspect-square"
               />

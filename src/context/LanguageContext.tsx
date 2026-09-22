@@ -18,6 +18,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem("panka-lang") as Locale | null;
     if (saved === "en" || saved === "es") {
       setLocaleState(saved);
+      document.documentElement.lang = saved;
+    } else {
+      document.documentElement.lang = "en";
     }
   }, []);
 

@@ -15,10 +15,11 @@ import {
 import { useCart } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useCatalog } from "@/context/CatalogContext";
+import { getProductImageAlt } from "@/lib/product-alt";
 
 export default function CartDrawer() {
   const { items, isOpen, closeCart, removeItem, updateQuantity, addItem, totalPrice, totalItems } = useCart();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const { products } = useCatalog();
   const [promoCode, setPromoCode] = useState("");
   const [promoMessage, setPromoMessage] = useState("");
@@ -93,7 +94,7 @@ export default function CartDrawer() {
                     <div className="relative mx-auto aspect-square w-full max-w-[10.5rem] shrink-0 overflow-hidden rounded-xl bg-surface-container-low sm:mx-0 sm:w-32 sm:max-w-none md:w-36">
                       <Image
                         src={item.product.image}
-                        alt={item.product.name}
+                        alt={getProductImageAlt(item.product, locale)}
                         fill
                         className="object-cover transition-transform duration-700 group-hover:scale-105"
                         sizes="(max-width: 640px) 50vw, 176px"
@@ -164,7 +165,13 @@ export default function CartDrawer() {
                         className="flex items-center gap-3 rounded-2xl border border-outline-variant/20 bg-surface-container-low/50 p-3"
                       >
                         <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-surface-container-low">
-                          <Image src={p.image} alt={p.name} fill className="object-cover" sizes="48px" />
+                          <Image
+                            src={p.image}
+                            alt={getProductImageAlt(p, locale)}
+                            fill
+                            className="object-cover"
+                            sizes="48px"
+                          />
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-semibold text-on-surface">{p.name}</p>

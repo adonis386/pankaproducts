@@ -10,6 +10,10 @@ export interface Product {
   ingredients: string[];
   isPopular?: boolean;
   stock: number;
+  /** Soft catalog flag: archived products are inactive. */
+  active?: boolean;
+  /** Daily kitchen availability; false hides buy CTA / blocks checkout. */
+  isAvailable?: boolean;
 }
 
 export interface CartItem {

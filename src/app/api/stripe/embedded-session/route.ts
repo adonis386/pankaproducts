@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { stripe, isStripeConfigured } from "@/lib/stripe";
+import { getCatalogAvailability } from "@/lib/catalog-sync";
 
 interface CheckoutItemPayloadV2 {
   productId: string;
@@ -22,11 +23,27 @@ interface CheckoutPayload {
 async function getPriceIdForProduct(productId: string) {
   if (!stripe) throw new Error("Stripe not configured.");
 
+  const replica = await getCatalogAvailability(productId).catch(() => null);
+  if (replica) {
+    if (!replica.active || !replica.isAvailable) {
+      throw new Error("Product is unavailable.");
+    }
+    if (!replica.seedKey) {
+      throw new Error("Product is not eligible for checkout.");
+    }
+    if (replica.stripePriceId) {
+      return replica.stripePriceId;
+    }
+  }
+
   const product = await stripe.products.retrieve(productId);
   if (typeof product === "string" || !product) throw new Error("Invalid product.");
 
   if (!product.active) throw new Error("Product is inactive.");
   if (!product.metadata?.seedKey) throw new Error("Product is not eligible for checkout.");
+  if (product.metadata?.isAvailable === "false" || product.metadata?.isAvailable === "0") {
+    throw new Error("Product is unavailable.");
+  }
 
   // Prefer default price; fall back to first active price.
   if (product.default_price && typeof product.default_price === "string") {

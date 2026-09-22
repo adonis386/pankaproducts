@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
+import type Stripe from "stripe";
 import { stripe, isStripeConfigured } from "@/lib/stripe";
 import { requireAdminFromRequest } from "@/lib/admin-auth";
+import {
+  archiveCatalogProduct,
+  getCatalogProduct,
+  mapStripeProductToCatalogDoc,
+  upsertCatalogProduct,
+} from "@/lib/catalog-sync";
 
 export const runtime = "nodejs";
 
@@ -19,6 +26,22 @@ function getBaseUrl(request: Request) {
   return url.origin;
 }
 
+function resolveDefaultPrice(product: Stripe.Product): Stripe.Price | null {
+  if (product.default_price && typeof product.default_price !== "string") {
+    return product.default_price;
+  }
+  return null;
+}
+
+async function syncProductReplica(
+  product: Stripe.Product,
+  price: Stripe.Price | null,
+  overrides?: { isAvailable?: boolean; active?: boolean }
+) {
+  const doc = mapStripeProductToCatalogDoc(product, price, overrides);
+  await upsertCatalogProduct(product.id, doc);
+}
+
 export async function GET(request: Request) {
   try {
     await requireAdminFromRequest(request);
@@ -32,24 +55,42 @@ export async function GET(request: Request) {
       expand: ["data.default_price"],
     });
 
-    const products = list.data.map((p) => {
-      const defaultPrice = typeof p.default_price === "string" ? null : p.default_price;
-      const unitAmount = defaultPrice?.unit_amount ?? null;
-      return {
-        id: p.id,
-        name: p.name,
-        active: p.active,
-        description: p.description || "",
-        image: p.metadata?.image || p.images?.[0] || "",
-        popular: p.metadata?.popular === "true" || p.metadata?.popular === "1",
-        seedKey: p.metadata?.seedKey || "",
-        sort: Number(p.metadata?.sort || "9999"),
-        category: p.metadata?.category || "salados",
-        price: unitAmount != null ? unitAmount / 100 : null,
-        currency: defaultPrice?.currency || "usd",
-        defaultPriceId: defaultPrice?.id || null,
-      };
-    });
+    const products = await Promise.all(
+      list.data.map(async (p) => {
+        const defaultPrice = resolveDefaultPrice(p);
+        const unitAmount = defaultPrice?.unit_amount ?? null;
+        const replica = await getCatalogProduct(p.id).catch(() => null);
+        const isAvailable =
+          replica?.isAvailable ??
+          (p.metadata?.isAvailable == null
+            ? p.active
+            : p.metadata.isAvailable === "true" || p.metadata.isAvailable === "1");
+
+        // Keep Firestore replica warm for public catalog reads.
+        if (p.metadata?.seedKey) {
+          await syncProductReplica(p, defaultPrice, {
+            isAvailable: Boolean(isAvailable),
+            active: p.active,
+          }).catch(() => undefined);
+        }
+
+        return {
+          id: p.id,
+          name: p.name,
+          active: p.active,
+          isAvailable: Boolean(isAvailable),
+          description: p.description || "",
+          image: p.metadata?.image || p.images?.[0] || "",
+          popular: p.metadata?.popular === "true" || p.metadata?.popular === "1",
+          seedKey: p.metadata?.seedKey || "",
+          sort: Number(p.metadata?.sort || "9999"),
+          category: p.metadata?.category || "salados",
+          price: unitAmount != null ? unitAmount / 100 : null,
+          currency: defaultPrice?.currency || "usd",
+          defaultPriceId: defaultPrice?.id || null,
+        };
+      })
+    );
 
     return NextResponse.json({ products });
   } catch (error) {
@@ -72,6 +113,7 @@ export async function POST(request: Request) {
       price: number;
       image?: string;
       active?: boolean;
+      isAvailable?: boolean;
       popular?: boolean;
       sort?: number;
       category?: string;
@@ -86,6 +128,7 @@ export async function POST(request: Request) {
       body.image && body.image.trim()
         ? body.image.trim()
         : `${getBaseUrl(request)}/tamales/pollo/pollo(3).webp`;
+    const isAvailable = body.isAvailable ?? body.active ?? true;
 
     const metadata: Record<string, string> = {
       seedKey,
@@ -95,12 +138,14 @@ export async function POST(request: Request) {
       sort: String(body.sort ?? 9999),
       image,
       ingredients: "",
+      isAvailable: isAvailable ? "true" : "false",
     };
 
     const product = await stripe.products.create({
       name: body.name,
       description: body.description || "",
       active: body.active ?? true,
+      images: image.startsWith("http") ? [image] : [],
       metadata,
     });
 
@@ -113,7 +158,14 @@ export async function POST(request: Request) {
       metadata: { seedKey },
     });
 
-    await stripe.products.update(product.id, { default_price: price.id });
+    const updated = await stripe.products.update(product.id, {
+      default_price: price.id,
+    });
+
+    await syncProductReplica(updated, price, {
+      isAvailable: Boolean(isAvailable),
+      active: updated.active,
+    });
 
     return NextResponse.json({ id: product.id });
   } catch (error) {
@@ -136,6 +188,7 @@ export async function PATCH(request: Request) {
       description?: string;
       image?: string;
       active?: boolean;
+      isAvailable?: boolean;
       popular?: boolean;
       sort?: number;
       category?: string;
@@ -144,8 +197,21 @@ export async function PATCH(request: Request) {
 
     if (!body.id) return NextResponse.json({ error: "Missing id." }, { status: 400 });
 
-    const existing = await stripe.products.retrieve(body.id);
+    const existing = await stripe.products.retrieve(body.id, {
+      expand: ["default_price"],
+    });
     const currentMeta = existing.metadata || {};
+    const previousDefaultPriceId =
+      typeof existing.default_price === "string"
+        ? existing.default_price
+        : existing.default_price?.id || null;
+
+    const nextIsAvailable =
+      body.isAvailable == null
+        ? currentMeta.isAvailable == null
+          ? existing.active
+          : currentMeta.isAvailable === "true" || currentMeta.isAvailable === "1"
+        : body.isAvailable;
 
     const metadata: Record<string, string> = {
       ...currentMeta,
@@ -158,14 +224,24 @@ export async function PATCH(request: Request) {
             : "false",
       sort: body.sort == null ? currentMeta.sort ?? "9999" : String(body.sort),
       image: body.image ?? currentMeta.image ?? "",
+      isAvailable: nextIsAvailable ? "true" : "false",
     };
 
     const updated = await stripe.products.update(body.id, {
       name: body.name,
       description: body.description,
       active: body.active,
+      images:
+        body.image && body.image.startsWith("http")
+          ? [body.image]
+          : undefined,
       metadata,
     });
+
+    let activePrice: Stripe.Price | null =
+      typeof updated.default_price === "string"
+        ? null
+        : (updated.default_price as Stripe.Price | null);
 
     if (typeof body.price === "number") {
       const unitAmount = Math.round(body.price * 100);
@@ -177,8 +253,32 @@ export async function PATCH(request: Request) {
         active: true,
         metadata: { seedKey },
       });
+
       await stripe.products.update(updated.id, { default_price: newPrice.id });
+
+      // Prices are immutable: retire the previous default so checkout cannot reuse it.
+      if (previousDefaultPriceId && previousDefaultPriceId !== newPrice.id) {
+        await stripe.prices.update(previousDefaultPriceId, { active: false });
+      }
+
+      activePrice = newPrice;
+    } else if (!activePrice && previousDefaultPriceId) {
+      activePrice = await stripe.prices.retrieve(previousDefaultPriceId);
     }
+
+    const refreshed = await stripe.products.retrieve(updated.id, {
+      expand: ["default_price"],
+    });
+    const finalPrice =
+      activePrice ||
+      (typeof refreshed.default_price !== "string"
+        ? refreshed.default_price ?? null
+        : null);
+
+    await syncProductReplica(refreshed, finalPrice, {
+      isAvailable: Boolean(nextIsAvailable),
+      active: refreshed.active,
+    });
 
     return NextResponse.json({ ok: true });
   } catch (error) {
@@ -199,11 +299,17 @@ export async function DELETE(request: Request) {
     const body = (await request.json()) as { id: string };
     if (!body?.id) return NextResponse.json({ error: "Missing id." }, { status: 400 });
 
-    // "Delete" safely by archiving: set product inactive and deactivate all active prices.
-    await stripeClient.products.update(body.id, { active: false });
+    // Soft-delete: archive in Stripe and deactivate all active prices.
+    const existing = await stripeClient.products.retrieve(body.id);
+    await stripeClient.products.update(body.id, {
+      active: false,
+      metadata: { ...(existing.metadata || {}), isAvailable: "false" },
+    });
 
     const prices = await stripeClient.prices.list({ product: body.id, active: true, limit: 100 });
     await Promise.all(prices.data.map((p) => stripeClient.prices.update(p.id, { active: false })));
+
+    await archiveCatalogProduct(body.id);
 
     return NextResponse.json({ ok: true });
   } catch (error) {
@@ -211,4 +317,3 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }
-

@@ -1,86 +1,87 @@
 import { NextResponse } from "next/server";
 import { stripe, isStripeConfigured } from "@/lib/stripe";
 import { Product } from "@/lib/types";
+import {
+  listPublicCatalogProducts,
+  mapStripeProductToCatalogDoc,
+  upsertCatalogProduct,
+} from "@/lib/catalog-sync";
 
-const FALLBACK_IMAGE = "/hero_1.jpg";
+export const runtime = "nodejs";
 
-function parseCategory(raw?: string): Product["category"] {
-  const value = (raw || "").toLowerCase().trim();
-  if (value === "salados" || value === "savory") return "salados";
-  if (value === "dulces" || value === "sweet") return "dulces";
-  return "especiales";
-}
+async function backfillFromStripe(): Promise<Product[]> {
+  if (!isStripeConfigured || !stripe) return [];
 
-function parseIngredients(raw?: string): string[] {
-  if (!raw) return [];
-  return raw
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
+  const stripeClient = stripe;
+  const stripeProducts = await stripeClient.products.list({
+    active: true,
+    limit: 100,
+    expand: ["data.default_price"],
+  });
+
+  const mapped = await Promise.all(
+    stripeProducts.data.map(async (item) => {
+      let selectedPrice = item.default_price;
+
+      if (!selectedPrice || typeof selectedPrice === "string") {
+        const prices = await stripeClient.prices.list({
+          product: item.id,
+          active: true,
+          limit: 1,
+        });
+        selectedPrice = prices.data[0] || null;
+      }
+
+      if (!selectedPrice || typeof selectedPrice === "string") return null;
+      if (!selectedPrice.unit_amount) return null;
+
+      const metadata = item.metadata || {};
+      if (!metadata.seedKey) return null;
+
+      const doc = mapStripeProductToCatalogDoc(item, selectedPrice);
+      if (!doc.isAvailable) return null;
+
+      await upsertCatalogProduct(item.id, doc).catch(() => undefined);
+
+      return {
+        id: item.id,
+        stripePriceId: selectedPrice.id,
+        name: item.name,
+        description: item.description || "",
+        price: selectedPrice.unit_amount / 100,
+        image: doc.image,
+        category: doc.category,
+        ingredients: doc.ingredients,
+        isPopular: doc.isPopular,
+        stock: doc.stock,
+        isAvailable: true,
+        sort: doc.sort,
+      } as Product & { sort: number };
+    })
+  );
+
+  return mapped
+    .filter((p): p is Product & { sort: number } => Boolean(p))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ sort: _sort, ...product }) => product);
 }
 
 export async function GET() {
   try {
-    if (!isStripeConfigured || !stripe) {
-      return NextResponse.json({ products: [] });
+    const fromFirestore = await listPublicCatalogProducts();
+    if (fromFirestore.length > 0) {
+      return NextResponse.json({ products: fromFirestore, source: "firestore" });
     }
-    const stripeClient = stripe;
 
-    const stripeProducts = await stripeClient.products.list({
-      active: true,
-      limit: 100,
-      expand: ["data.default_price"],
+    // First deploy / empty replica: seed from Stripe once, then serve.
+    const seeded = await backfillFromStripe();
+    return NextResponse.json({
+      products: seeded,
+      source: seeded.length > 0 ? "stripe-backfill" : "empty",
     });
-
-    const mapped = await Promise.all(
-      stripeProducts.data.map(async (item) => {
-        let selectedPrice = item.default_price;
-
-        // Fallback for products created without default_price in Stripe Dashboard.
-        if (!selectedPrice || typeof selectedPrice === "string") {
-          const prices = await stripeClient.prices.list({
-            product: item.id,
-            active: true,
-            limit: 1,
-          });
-          selectedPrice = prices.data[0] || null;
-        }
-
-        if (!selectedPrice || typeof selectedPrice === "string") return null;
-        if (!selectedPrice.unit_amount) return null;
-
-        const metadata = item.metadata || {};
-        // Only show products created by our seed/scripts (identified via metadata.seedKey).
-        // This prevents unrelated Stripe products from appearing in the storefront.
-        if (!metadata.seedKey) return null;
-
-        const stock = Number(metadata.stock || "99");
-        const sort = Number(metadata.sort || "9999");
-
-        return {
-          id: item.id,
-          stripePriceId: selectedPrice.id,
-          name: item.name,
-          description: item.description || "",
-          price: selectedPrice.unit_amount / 100,
-          image: item.images?.[0] || metadata.image || FALLBACK_IMAGE,
-          category: parseCategory(metadata.category),
-          ingredients: parseIngredients(metadata.ingredients),
-          isPopular: metadata.popular === "true" || metadata.popular === "1",
-          stock: Number.isFinite(stock) ? stock : 99,
-          sort: Number.isFinite(sort) ? sort : 9999,
-        } as Product & { sort: number };
-      })
-    );
-
-    const products: Product[] = mapped
-      .filter((p): p is Product & { sort: number } => Boolean(p))
-      .sort((a, b) => a.sort - b.sort)
-      .map(({ sort: _sort, ...product }) => product);
-
-    return NextResponse.json({ products });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to fetch catalog from Stripe.";
+    const message =
+      error instanceof Error ? error.message : "Failed to fetch catalog.";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

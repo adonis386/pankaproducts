@@ -10,11 +10,12 @@ import { useLanguage } from "@/context/LanguageContext";
 import { CustomerInfo } from "@/lib/types";
 import { HiArrowLeft } from "react-icons/hi";
 import StripeEmbeddedCheckout from "@/components/StripeEmbeddedCheckout";
+import { getProductImageAlt } from "@/lib/product-alt";
 
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [clientSecret, setClientSecret] = useState("");
@@ -185,7 +186,12 @@ export default function CheckoutPage() {
                   {items.map((item) => (
                     <li key={item.product.id} className="flex gap-3">
                       <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg">
-                        <Image src={item.product.image} alt={item.product.name} fill className="object-cover" />
+                        <Image
+                          src={item.product.image}
+                          alt={getProductImageAlt(item.product, locale)}
+                          fill
+                          className="object-cover"
+                        />
                       </div>
                       <div className="flex flex-1 items-center justify-between">
                         <div>

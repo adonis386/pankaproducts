@@ -12,6 +12,7 @@ type AdminProduct = {
   id: string;
   name: string;
   active: boolean;
+  isAvailable: boolean;
   description: string;
   image: string;
   popular: boolean;
@@ -49,6 +50,7 @@ export default function AdminProductosPage() {
     image: "/tamales/pollo/pollo(3).webp",
     popular: false,
     active: true,
+    isAvailable: true,
     sort: 9999,
     description: "",
     category: "salados",
@@ -512,7 +514,12 @@ export default function AdminProductosPage() {
                                 </p>
                                 {!p.active && (
                                   <span className="rounded-lg border border-amber-200 bg-amber-50 px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-amber-700">
-                                    No disponible
+                                    Archivado
+                                  </span>
+                                )}
+                                {p.active && !p.isAvailable && (
+                                  <span className="rounded-lg border border-orange-200 bg-orange-50 px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-orange-700">
+                                    Agotado hoy
                                   </span>
                                 )}
                               </div>
@@ -533,6 +540,15 @@ export default function AdminProductosPage() {
                                 className="rounded-xl border border-grey-10 bg-white px-4 py-2 text-sm font-semibold text-grey-70 hover:bg-grey-5 disabled:opacity-50"
                               >
                                 {p.active ? "Desactivar" : "Activar"}
+                              </button>
+                              <button
+                                onClick={() =>
+                                  updateProduct({ id: p.id, isAvailable: !p.isAvailable })
+                                }
+                                disabled={busy || !p.active}
+                                className="rounded-xl border border-grey-10 bg-white px-4 py-2 text-sm font-semibold text-grey-70 hover:bg-grey-5 disabled:opacity-50"
+                              >
+                                {p.isAvailable ? "Marcar agotado" : "Disponible hoy"}
                               </button>
                               <button
                                 onClick={() => updateProduct({ id: p.id, popular: !p.popular })}

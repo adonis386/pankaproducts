@@ -40,7 +40,7 @@ export default function Navbar() {
           <Link href="/" className="flex items-center gap-2.5">
             <Image
               src="/assets/PNAKALOGO.png"
-              alt="Panka"
+              alt="Panka — artisan tamales"
               width={160}
               height={48}
               className="h-16 w-auto"
