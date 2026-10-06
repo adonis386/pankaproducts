@@ -231,10 +231,15 @@ export async function PATCH(request: Request) {
       name: body.name,
       description: body.description,
       active: body.active,
+      // Stripe clears a list field only when given "", never an empty array. If
+      // this is left set, images[0] keeps winning over metadata.image and the
+      // product stays pinned to the old URL.
       images:
-        body.image && body.image.startsWith("http")
-          ? [body.image]
-          : undefined,
+        body.image == null
+          ? undefined
+          : body.image.startsWith("http")
+            ? [body.image]
+            : "",
       metadata,
     });
 
