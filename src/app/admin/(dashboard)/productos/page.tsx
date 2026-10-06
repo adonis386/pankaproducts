@@ -6,7 +6,7 @@ import Link from "next/link";
 import { auth } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { HiCheckCircle, HiOutlinePhotograph, HiOutlineRefresh, HiOutlineSave, HiOutlineTrash } from "react-icons/hi";
+import { HiArrowSmDown, HiArrowSmUp, HiCheckCircle, HiOutlinePhotograph, HiOutlineRefresh, HiOutlineSave, HiOutlineStar, HiOutlineTrash } from "react-icons/hi";
 
 type AdminProduct = {
   id: string;
@@ -101,6 +101,13 @@ export default function AdminProductosPage() {
 
   const canUseAdmin = useMemo(() => Boolean(user?.email), [user?.email]);
 
+  // The storefront shows products by ascending sort, so the panel mirrors that
+  // order and reordering here is literally what the customer will see.
+  const ordered = useMemo(
+    () => [...items].sort((a, b) => (a.sort || 9999) - (b.sort || 9999)),
+    [items]
+  );
+
   const toast = (msg: string) => {
     setNotice(msg);
     window.setTimeout(() => setNotice(""), 3000);
@@ -158,6 +165,50 @@ export default function AdminProductosPage() {
     } finally {
       setBusy(false);
     }
+  };
+
+  const applyOrder = async (ids: string[], message: string) => {
+    setBusy(true);
+    setError("");
+    // Show the new order straight away; load() below confirms it against Stripe.
+    setItems((prev) =>
+      prev.map((item) => {
+        const index = ids.indexOf(item.id);
+        return index === -1 ? item : { ...item, sort: index + 1 };
+      })
+    );
+    try {
+      const token = await getIdTokenOrThrow();
+      const res = await fetch("/admin/api/products/reorder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ ids }),
+      });
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok) throw new Error(data.error || "Failed to reorder.");
+      await load();
+      toast(message);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to reorder.");
+      await load();
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const moveProduct = async (id: string, direction: -1 | 1) => {
+    const ids = ordered.map((p) => p.id);
+    const from = ids.indexOf(id);
+    const to = from + direction;
+    if (from === -1 || to < 0 || to >= ids.length) return;
+    [ids[from], ids[to]] = [ids[to], ids[from]];
+    await applyOrder(ids, direction === -1 ? "Movido arriba." : "Movido abajo.");
+  };
+
+  const moveToTop = async (id: string) => {
+    const ids = ordered.map((p) => p.id);
+    if (ids[0] === id) return;
+    await applyOrder([id, ...ids.filter((x) => x !== id)], "Puesto de primero.");
   };
 
   const updateProduct = async (p: Partial<AdminProduct> & { id: string }) => {
@@ -550,9 +601,8 @@ export default function AdminProductosPage() {
                   {items.length === 0 ? (
                     <p className="text-sm text-grey-40">No hay productos.</p>
                   ) : (
-                    items
-                      .sort((a, b) => (a.sort || 9999) - (b.sort || 9999))
-                      .map((p) => (
+                    ordered
+                      .map((p, index) => (
                         <div
                           key={p.id}
                           className={`rounded-2xl border border-grey-10 p-5 transition-all ${
@@ -561,6 +611,29 @@ export default function AdminProductosPage() {
                         >
                           <div className="flex flex-col gap-4 small:flex-row small:items-start small:justify-between">
                             <div className="flex items-start gap-4 min-w-0">
+                              <div className="flex shrink-0 flex-col items-center gap-1">
+                                <button
+                                  onClick={() => moveProduct(p.id, -1)}
+                                  disabled={busy || index === 0}
+                                  title="Subir"
+                                  aria-label={`Subir ${p.name}`}
+                                  className="rounded-lg border border-grey-10 bg-white p-1 text-grey-60 hover:bg-grey-5 disabled:opacity-30"
+                                >
+                                  <HiArrowSmUp className="h-5 w-5" />
+                                </button>
+                                <span className="text-xs font-bold text-grey-40" title="Posición en la tienda">
+                                  {index + 1}
+                                </span>
+                                <button
+                                  onClick={() => moveProduct(p.id, 1)}
+                                  disabled={busy || index === ordered.length - 1}
+                                  title="Bajar"
+                                  aria-label={`Bajar ${p.name}`}
+                                  className="rounded-lg border border-grey-10 bg-white p-1 text-grey-60 hover:bg-grey-5 disabled:opacity-30"
+                                >
+                                  <HiArrowSmDown className="h-5 w-5" />
+                                </button>
+                              </div>
                               <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-grey-5">
                                 <Image
                                   src={p.image || "/tamales/pollo/pollo(3).webp"}
@@ -584,6 +657,11 @@ export default function AdminProductosPage() {
                                     Agotado hoy
                                   </span>
                                 )}
+                                {p.popular && (
+                                  <span className="rounded-lg border border-panka-green-200 bg-panka-green-50 px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-panka-green-700">
+                                    Destacado
+                                  </span>
+                                )}
                               </div>
                               <p className="text-sm text-grey-40 truncate">{p.id}</p>
                               <p className="mt-2 text-sm text-grey-50">
@@ -596,6 +674,14 @@ export default function AdminProductosPage() {
                             </div>
 
                             <div className="flex flex-wrap gap-2">
+                              <button
+                                onClick={() => moveToTop(p.id)}
+                                disabled={busy || index === 0}
+                                className="inline-flex items-center gap-2 rounded-xl border border-grey-10 bg-white px-4 py-2 text-sm font-semibold text-grey-70 hover:bg-grey-5 disabled:opacity-50"
+                              >
+                                <HiOutlineStar className="h-5 w-5" />
+                                Poner primero
+                              </button>
                               <button
                                 onClick={() => updateProduct({ id: p.id, active: !p.active })}
                                 disabled={busy}
@@ -631,6 +717,22 @@ export default function AdminProductosPage() {
                           </div>
 
                           <div className="mt-4 grid grid-cols-1 gap-3 xsmall:grid-cols-2">
+                            <div className="xsmall:col-span-2">
+                              <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-grey-30">
+                                Nombre
+                              </label>
+                              <input
+                                type="text"
+                                value={edits[p.id]?.name ?? p.name}
+                                onChange={(e) =>
+                                  setEdits((m) => ({
+                                    ...m,
+                                    [p.id]: { ...(m[p.id] || {}), name: e.target.value },
+                                  }))
+                                }
+                                className="w-full rounded-xl border border-grey-20 bg-grey-5 px-4 py-3 text-sm text-grey-80 outline-none focus:border-panka-green-400 focus:ring-2 focus:ring-panka-green-50"
+                              />
+                            </div>
                             <div>
                               <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-grey-30">
                                 Foto
@@ -689,10 +791,16 @@ export default function AdminProductosPage() {
                             <div className="xsmall:col-span-2 flex justify-end">
                               <button
                                 onClick={() => {
-                                  const { price, ...rest } = edits[p.id] || {};
+                                  const { price, name, ...rest } = edits[p.id] || {};
+                                  const trimmed = (name ?? "").trim();
+                                  if (name != null && !trimmed) {
+                                    setError("El nombre no puede quedar vacío.");
+                                    return;
+                                  }
                                   void updateProduct({
                                     id: p.id,
                                     ...rest,
+                                    ...(trimmed ? { name: trimmed } : {}),
                                     ...(typeof price === "number" ? { price } : {}),
                                   });
                                 }}
