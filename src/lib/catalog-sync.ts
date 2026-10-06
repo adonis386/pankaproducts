@@ -3,7 +3,7 @@ import "server-only";
 import { FieldValue } from "firebase-admin/firestore";
 import type Stripe from "stripe";
 import { adminDb } from "@/lib/firebase-admin";
-import { stripe } from "@/lib/stripe";
+import { CATALOG_COLLECTION, stripe } from "@/lib/stripe";
 import type { Product } from "@/lib/types";
 
 // Marks a product the admin removed but that Stripe refuses to hard-delete.
@@ -113,7 +113,7 @@ export async function upsertCatalogProduct(
   opts?: { createIfMissing?: boolean }
 ) {
   const db = adminDb();
-  const ref = db.collection("products").doc(productId);
+  const ref = db.collection(CATALOG_COLLECTION).doc(productId);
   const snap = await ref.get();
   const payload = {
     ...data,
@@ -130,7 +130,7 @@ export async function upsertCatalogProduct(
 
 export async function deleteCatalogProduct(productId: string) {
   const db = adminDb();
-  await db.collection("products").doc(productId).delete();
+  await db.collection(CATALOG_COLLECTION).doc(productId).delete();
 }
 
 export async function resolveStripePrice(
@@ -258,13 +258,13 @@ export async function purgeStripeProduct(
 
 export async function listCatalogProductIds(): Promise<string[]> {
   const db = adminDb();
-  const snap = await db.collection("products").select().get();
+  const snap = await db.collection(CATALOG_COLLECTION).select().get();
   return snap.docs.map((doc) => doc.id);
 }
 
 export async function getCatalogProduct(productId: string) {
   const db = adminDb();
-  const snap = await db.collection("products").doc(productId).get();
+  const snap = await db.collection(CATALOG_COLLECTION).doc(productId).get();
   if (!snap.exists) return null;
   return { id: snap.id, ...(snap.data() as CatalogProductDoc) };
 }
@@ -272,7 +272,7 @@ export async function getCatalogProduct(productId: string) {
 export async function listPublicCatalogProducts(): Promise<Product[]> {
   const db = adminDb();
   const snap = await db
-    .collection("products")
+    .collection(CATALOG_COLLECTION)
     .where("active", "==", true)
     .get();
 

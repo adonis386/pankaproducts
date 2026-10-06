@@ -2,7 +2,7 @@ import "server-only";
 
 import Stripe from "stripe";
 import { FieldValue, type DocumentData, type Timestamp } from "firebase-admin/firestore";
-import { stripe } from "@/lib/stripe";
+import { ORDERS_COLLECTION, stripe } from "@/lib/stripe";
 import { adminDb } from "@/lib/firebase-admin";
 import type { KitchenStatus, PublicOrder } from "@/lib/order-types";
 
@@ -84,7 +84,7 @@ export async function upsertOrderFromSession(session: Stripe.Checkout.Session) {
   if (!stripe) throw new Error("Stripe not configured.");
 
   const db = adminDb();
-  const orderRef = db.collection("orders").doc(session.id);
+  const orderRef = db.collection(ORDERS_COLLECTION).doc(session.id);
   const snap = await orderRef.get();
   if (snap.exists) return serializeOrder(snap.id, snap.data() || {});
 
@@ -153,7 +153,7 @@ export async function getOrReconcileOrder(sessionId: string): Promise<PublicOrde
   if (!stripe) throw new Error("Stripe not configured.");
 
   const db = adminDb();
-  const existing = await db.collection("orders").doc(sessionId).get();
+  const existing = await db.collection(ORDERS_COLLECTION).doc(sessionId).get();
   if (existing.exists) {
     return serializeOrder(existing.id, existing.data() || {});
   }
@@ -170,10 +170,10 @@ export async function getOrReconcileOrder(sessionId: string): Promise<PublicOrde
 export async function listOrders(limit = 100): Promise<PublicOrder[]> {
   const db = adminDb();
   try {
-    const snap = await db.collection("orders").orderBy("createdAt", "desc").limit(limit).get();
+    const snap = await db.collection(ORDERS_COLLECTION).orderBy("createdAt", "desc").limit(limit).get();
     return snap.docs.map((doc) => serializeOrder(doc.id, doc.data()));
   } catch {
-    const snap = await db.collection("orders").limit(limit).get();
+    const snap = await db.collection(ORDERS_COLLECTION).limit(limit).get();
     return snap.docs.map((doc) => serializeOrder(doc.id, doc.data()));
   }
 }
@@ -191,7 +191,7 @@ export async function listOrdersForCustomer(opts: { email?: string; uid?: string
 
 export async function updateOrderStatus(id: string, status: KitchenStatus) {
   const db = adminDb();
-  const ref = db.collection("orders").doc(id);
+  const ref = db.collection(ORDERS_COLLECTION).doc(id);
   const snap = await ref.get();
   if (!snap.exists) throw new Error("Order not found.");
   await ref.update({ status, updatedAt: FieldValue.serverTimestamp() });
