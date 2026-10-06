@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type InputHTMLAttributes } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { auth } from "@/lib/firebase";
@@ -29,6 +29,46 @@ async function getIdTokenOrThrow() {
   return await auth.currentUser.getIdToken();
 }
 
+function NumericInput({
+  value,
+  onChange,
+  ...rest
+}: {
+  value: number | "" | null | undefined;
+  onChange: (value: number | "") => void;
+} & Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "onChange">) {
+  const [text, setText] = useState("");
+
+  useEffect(() => {
+    if (value === "" || value == null) {
+      setText("");
+      return;
+    }
+    if (text !== "" && Number(text) === value) return;
+    setText(String(value));
+    // Keep local text so typing "5." is not reset to "5".
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
+  return (
+    <input
+      type="number"
+      value={text}
+      onChange={(e) => {
+        const raw = e.target.value;
+        setText(raw);
+        if (raw.trim() === "") {
+          onChange("");
+          return;
+        }
+        const n = Number(raw);
+        if (!Number.isNaN(n)) onChange(n);
+      }}
+      {...rest}
+    />
+  );
+}
+
 export default function AdminProductosPage() {
   const { user, loading } = useAuth();
   const { t } = useLanguage();
@@ -39,19 +79,22 @@ export default function AdminProductosPage() {
   const [uploading, setUploading] = useState<Record<string, boolean>>({});
   const [draftUploading, setDraftUploading] = useState(false);
 
-  const [edits, setEdits] = useState<Record<string, Partial<AdminProduct>>>({});
+  // Price is widened to "" so the input can be cleared without forcing a 0.
+  const [edits, setEdits] = useState<
+    Record<string, Omit<Partial<AdminProduct>, "price"> & { price?: number | "" }>
+  >({});
 
   const [wizardStep, setWizardStep] = useState<0 | 1 | 2 | 3>(0); // details -> photo -> review -> done
   const [createdProductId, setCreatedProductId] = useState<string>("");
 
   const [draft, setDraft] = useState({
     name: "",
-    price: 5,
+    price: "" as number | "",
     image: "/tamales/pollo/pollo(3).webp",
     popular: false,
     active: true,
     isAvailable: true,
-    sort: 9999,
+    sort: "" as number | "",
     description: "",
     category: "salados",
   });
@@ -92,11 +135,17 @@ export default function AdminProductosPage() {
     setBusy(true);
     setError("");
     try {
+      if (typeof draft.price !== "number") {
+        throw new Error("Indica un precio.");
+      }
       const token = await getIdTokenOrThrow();
       const res = await fetch("/admin/api/products", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify(draft),
+        body: JSON.stringify({
+          ...draft,
+          sort: typeof draft.sort === "number" ? draft.sort : 9999,
+        }),
       });
       const data = (await res.json()) as { id?: string; error?: string };
       if (!res.ok) throw new Error(data.error || "Failed to create product.");
@@ -133,7 +182,9 @@ export default function AdminProductosPage() {
   };
 
   const deleteProduct = async (id: string) => {
-    const ok = window.confirm("¿Eliminar (archivar) este producto? Se ocultará de la tienda.");
+    const ok = window.confirm(
+      "¿Eliminar este producto? Desaparecerá de la tienda y del panel. Los pedidos antiguos no se tocan."
+    );
     if (!ok) return;
 
     setBusy(true);
@@ -145,10 +196,18 @@ export default function AdminProductosPage() {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ id }),
       });
-      const data = (await res.json()) as { ok?: boolean; error?: string };
+      const data = (await res.json()) as {
+        ok?: boolean;
+        hardDeleted?: boolean;
+        error?: string;
+      };
       if (!res.ok) throw new Error(data.error || "Failed to delete product.");
       await load();
-      toast("Producto archivado.");
+      toast(
+        data.hardDeleted
+          ? "Producto eliminado de Stripe."
+          : "Producto eliminado. Stripe conserva una copia oculta por historial de ventas."
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to delete product.");
     } finally {
@@ -301,20 +360,20 @@ export default function AdminProductosPage() {
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="mb-1.5 block text-sm font-medium text-grey-50">Precio ($)</label>
-                          <input
-                            type="number"
+                          <NumericInput
                             step="0.01"
                             value={draft.price}
-                            onChange={(e) => setDraft((d) => ({ ...d, price: Number(e.target.value) }))}
+                            onChange={(price) => setDraft((d) => ({ ...d, price }))}
+                            placeholder="—"
                             className="w-full rounded-xl border border-grey-20 bg-grey-5 px-4 py-3 text-base text-grey-80 outline-none focus:border-panka-green-400 focus:ring-2 focus:ring-panka-green-50"
                           />
                         </div>
                         <div>
                           <label className="mb-1.5 block text-sm font-medium text-grey-50">Orden</label>
-                          <input
-                            type="number"
+                          <NumericInput
                             value={draft.sort}
-                            onChange={(e) => setDraft((d) => ({ ...d, sort: Number(e.target.value) }))}
+                            onChange={(sort) => setDraft((d) => ({ ...d, sort }))}
+                            placeholder="—"
                             className="w-full rounded-xl border border-grey-20 bg-grey-5 px-4 py-3 text-base text-grey-80 outline-none focus:border-panka-green-400 focus:ring-2 focus:ring-panka-green-50"
                           />
                         </div>
@@ -409,7 +468,10 @@ export default function AdminProductosPage() {
                     <div className="space-y-4 animate-fade-in-top">
                       <div className="rounded-2xl border border-grey-10 bg-grey-5 p-4">
                         <p className="text-sm font-semibold text-grey-80">{draft.name}</p>
-                        <p className="text-sm text-grey-50">${draft.price.toFixed(2)} · Orden {draft.sort}</p>
+                        <p className="text-sm text-grey-50">
+                          {typeof draft.price === "number" ? `$${draft.price.toFixed(2)}` : "Sin precio"} · Orden{" "}
+                          {draft.sort === "" ? "—" : draft.sort}
+                        </p>
                         <p className="mt-2 text-sm text-grey-50">{draft.description || "Sin descripción"}</p>
                         <div className="mt-3 flex flex-wrap gap-2 text-xs">
                           <span className={`rounded-lg px-2 py-1 font-semibold ${draft.active ? "bg-panka-green-50 text-panka-green-700" : "bg-grey-10 text-grey-50"}`}>
@@ -460,7 +522,7 @@ export default function AdminProductosPage() {
                       <div className="flex flex-col gap-2">
                         <button
                           onClick={() => {
-                            setDraft((d) => ({ ...d, name: "", description: "" }));
+                            setDraft((d) => ({ ...d, name: "", description: "", price: "", sort: "" }));
                             setCreatedProductId("");
                             setWizardStep(0);
                           }}
@@ -559,7 +621,7 @@ export default function AdminProductosPage() {
                               </button>
                               <button
                                 onClick={() => deleteProduct(p.id)}
-                                disabled={busy || !p.active}
+                                disabled={busy}
                                 className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:opacity-50"
                               >
                                 <HiOutlineTrash className="h-5 w-5" />
@@ -595,16 +657,16 @@ export default function AdminProductosPage() {
                               <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-grey-30">
                                 Precio ($)
                               </label>
-                              <input
-                                type="number"
+                              <NumericInput
                                 step="0.01"
-                                value={edits[p.id]?.price ?? p.price ?? 0}
-                                onChange={(e) =>
+                                value={edits[p.id]?.price ?? p.price}
+                                onChange={(price) =>
                                   setEdits((m) => ({
                                     ...m,
-                                    [p.id]: { ...(m[p.id] || {}), price: Number(e.target.value) },
+                                    [p.id]: { ...(m[p.id] || {}), price },
                                   }))
                                 }
+                                placeholder="—"
                                 className="w-full rounded-xl border border-grey-20 bg-grey-5 px-4 py-3 text-sm text-grey-80 outline-none focus:border-panka-green-400 focus:ring-2 focus:ring-panka-green-50"
                               />
                             </div>
@@ -626,7 +688,14 @@ export default function AdminProductosPage() {
                             </div>
                             <div className="xsmall:col-span-2 flex justify-end">
                               <button
-                                onClick={() => updateProduct({ id: p.id, ...edits[p.id] })}
+                                onClick={() => {
+                                  const { price, ...rest } = edits[p.id] || {};
+                                  void updateProduct({
+                                    id: p.id,
+                                    ...rest,
+                                    ...(typeof price === "number" ? { price } : {}),
+                                  });
+                                }}
                                 disabled={busy || !edits[p.id] || Object.keys(edits[p.id] || {}).length === 0}
                                 className="inline-flex items-center gap-2 rounded-xl bg-panka-brown-500 px-5 py-3 text-sm font-bold text-white transition-all hover:bg-panka-brown-600 hover:shadow-panka-sm disabled:opacity-50"
                               >

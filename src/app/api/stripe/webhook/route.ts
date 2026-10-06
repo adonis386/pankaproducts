@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { stripe, isStripeConfigured } from "@/lib/stripe";
 import { upsertOrderFromSession } from "@/lib/stripe-orders";
+import { deleteCatalogProduct, syncProductFromStripe } from "@/lib/catalog-sync";
 
 export const runtime = "nodejs";
 
@@ -47,6 +48,29 @@ export async function POST(request: Request) {
         await upsertOrderFromSession(session);
         break;
       }
+
+      // Catalog edits made in the Stripe Dashboard flow back into the app here.
+      case "product.created":
+      case "product.updated": {
+        const product = event.data.object as Stripe.Product;
+        await syncProductFromStripe(product.id);
+        break;
+      }
+      case "product.deleted": {
+        const product = event.data.object as Stripe.Product;
+        await deleteCatalogProduct(product.id);
+        break;
+      }
+      case "price.created":
+      case "price.updated":
+      case "price.deleted": {
+        const price = event.data.object as Stripe.Price;
+        const productId =
+          typeof price.product === "string" ? price.product : price.product?.id;
+        if (productId) await syncProductFromStripe(productId);
+        break;
+      }
+
       default:
         break;
     }

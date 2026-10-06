@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import { stripe, isStripeConfigured } from "@/lib/stripe";
 import { Product } from "@/lib/types";
 import {
+  catalogDocToProduct,
   listPublicCatalogProducts,
-  mapStripeProductToCatalogDoc,
-  upsertCatalogProduct,
+  resolveStripePrice,
+  syncStripeProductToCatalog,
 } from "@/lib/catalog-sync";
 
 export const runtime = "nodejs";
@@ -21,49 +22,22 @@ async function backfillFromStripe(): Promise<Product[]> {
 
   const mapped = await Promise.all(
     stripeProducts.data.map(async (item) => {
-      let selectedPrice = item.default_price;
+      const selectedPrice = await resolveStripePrice(item);
+      if (!selectedPrice?.unit_amount) return null;
 
-      if (!selectedPrice || typeof selectedPrice === "string") {
-        const prices = await stripeClient.prices.list({
-          product: item.id,
-          active: true,
-          limit: 1,
-        });
-        selectedPrice = prices.data[0] || null;
-      }
+      const doc = await syncStripeProductToCatalog(item, selectedPrice).catch(
+        () => null
+      );
+      if (!doc || !doc.active || !doc.isAvailable) return null;
 
-      if (!selectedPrice || typeof selectedPrice === "string") return null;
-      if (!selectedPrice.unit_amount) return null;
-
-      const metadata = item.metadata || {};
-      if (!metadata.seedKey) return null;
-
-      const doc = mapStripeProductToCatalogDoc(item, selectedPrice);
-      if (!doc.isAvailable) return null;
-
-      await upsertCatalogProduct(item.id, doc).catch(() => undefined);
-
-      return {
-        id: item.id,
-        stripePriceId: selectedPrice.id,
-        name: item.name,
-        description: item.description || "",
-        price: selectedPrice.unit_amount / 100,
-        image: doc.image,
-        category: doc.category,
-        ingredients: doc.ingredients,
-        isPopular: doc.isPopular,
-        stock: doc.stock,
-        isAvailable: true,
-        sort: doc.sort,
-      } as Product & { sort: number };
+      return { product: catalogDocToProduct(item.id, doc), sort: doc.sort };
     })
   );
 
   return mapped
-    .filter((p): p is Product & { sort: number } => Boolean(p))
+    .filter((row): row is { product: Product; sort: number } => Boolean(row))
     .sort((a, b) => a.sort - b.sort)
-    .map(({ sort: _sort, ...product }) => product);
+    .map((row) => row.product);
 }
 
 export async function GET() {

@@ -3,34 +3,21 @@ import type Stripe from "stripe";
 import { stripe, isStripeConfigured } from "@/lib/stripe";
 import { requireAdminFromRequest } from "@/lib/admin-auth";
 import {
-  archiveCatalogProduct,
+  deleteCatalogProduct,
   getCatalogProduct,
-  mapStripeProductToCatalogDoc,
-  upsertCatalogProduct,
+  isDeletedStripeProduct,
+  listCatalogProductIds,
+  purgeStripeProduct,
+  resolveStripePrice,
+  slugify,
+  syncStripeProductToCatalog,
 } from "@/lib/catalog-sync";
 
 export const runtime = "nodejs";
 
-function slugify(input: string) {
-  return input
-    .normalize("NFD")
-    // eslint-disable-next-line no-control-regex
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
 function getBaseUrl(request: Request) {
   const url = new URL(request.url);
   return url.origin;
-}
-
-function resolveDefaultPrice(product: Stripe.Product): Stripe.Price | null {
-  if (product.default_price && typeof product.default_price !== "string") {
-    return product.default_price;
-  }
-  return null;
 }
 
 async function syncProductReplica(
@@ -38,8 +25,7 @@ async function syncProductReplica(
   price: Stripe.Price | null,
   overrides?: { isAvailable?: boolean; active?: boolean }
 ) {
-  const doc = mapStripeProductToCatalogDoc(product, price, overrides);
-  await upsertCatalogProduct(product.id, doc);
+  await syncStripeProductToCatalog(product, price, overrides);
 }
 
 export async function GET(request: Request) {
@@ -56,41 +42,55 @@ export async function GET(request: Request) {
     });
 
     const products = await Promise.all(
-      list.data.map(async (p) => {
-        const defaultPrice = resolveDefaultPrice(p);
-        const unitAmount = defaultPrice?.unit_amount ?? null;
-        const replica = await getCatalogProduct(p.id).catch(() => null);
-        const isAvailable =
-          replica?.isAvailable ??
-          (p.metadata?.isAvailable == null
-            ? p.active
-            : p.metadata.isAvailable === "true" || p.metadata.isAvailable === "1");
+      list.data
+        // Products Stripe would not let us delete are tombstoned, not listed.
+        .filter((p) => !isDeletedStripeProduct(p))
+        .map(async (p) => {
+          const defaultPrice = await resolveStripePrice(p);
+          const unitAmount = defaultPrice?.unit_amount ?? null;
+          const replica = await getCatalogProduct(p.id).catch(() => null);
+          const isAvailable =
+            replica?.isAvailable ??
+            (p.metadata?.isAvailable == null
+              ? p.active
+              : p.metadata.isAvailable === "true" || p.metadata.isAvailable === "1");
 
-        // Keep Firestore replica warm for public catalog reads.
-        if (p.metadata?.seedKey) {
+          // Keep Firestore replica warm for public catalog reads.
           await syncProductReplica(p, defaultPrice, {
             isAvailable: Boolean(isAvailable),
             active: p.active,
           }).catch(() => undefined);
-        }
 
-        return {
-          id: p.id,
-          name: p.name,
-          active: p.active,
-          isAvailable: Boolean(isAvailable),
-          description: p.description || "",
-          image: p.metadata?.image || p.images?.[0] || "",
-          popular: p.metadata?.popular === "true" || p.metadata?.popular === "1",
-          seedKey: p.metadata?.seedKey || "",
-          sort: Number(p.metadata?.sort || "9999"),
-          category: p.metadata?.category || "salados",
-          price: unitAmount != null ? unitAmount / 100 : null,
-          currency: defaultPrice?.currency || "usd",
-          defaultPriceId: defaultPrice?.id || null,
-        };
-      })
+          return {
+            id: p.id,
+            name: p.name,
+            active: p.active,
+            isAvailable: Boolean(isAvailable),
+            description: p.description || "",
+            image: p.metadata?.image || p.images?.[0] || "",
+            popular: p.metadata?.popular === "true" || p.metadata?.popular === "1",
+            seedKey: p.metadata?.seedKey || "",
+            sort: Number(p.metadata?.sort || "9999"),
+            category: p.metadata?.category || "salados",
+            price: unitAmount != null ? unitAmount / 100 : null,
+            currency: defaultPrice?.currency || "usd",
+            defaultPriceId: defaultPrice?.id || null,
+          };
+        })
     );
+
+    // Without a Stripe webhook endpoint there is nothing to tell us a product
+    // was removed from the Dashboard, so opening this page doubles as the full
+    // reconcile. Only safe while the whole catalog fits in one page.
+    if (!list.has_more) {
+      const live = new Set(list.data.map((p) => p.id));
+      const replicated = await listCatalogProductIds().catch(() => []);
+      await Promise.all(
+        replicated
+          .filter((id) => !live.has(id))
+          .map((id) => deleteCatalogProduct(id).catch(() => undefined))
+      );
+    }
 
     return NextResponse.json({ products });
   } catch (error) {
@@ -294,24 +294,13 @@ export async function DELETE(request: Request) {
     if (!isStripeConfigured || !stripe) {
       return NextResponse.json({ error: "Stripe not configured." }, { status: 500 });
     }
-    const stripeClient = stripe;
 
     const body = (await request.json()) as { id: string };
     if (!body?.id) return NextResponse.json({ error: "Missing id." }, { status: 400 });
 
-    // Soft-delete: archive in Stripe and deactivate all active prices.
-    const existing = await stripeClient.products.retrieve(body.id);
-    await stripeClient.products.update(body.id, {
-      active: false,
-      metadata: { ...(existing.metadata || {}), isAvailable: "false" },
-    });
+    const { hardDeleted } = await purgeStripeProduct(body.id);
 
-    const prices = await stripeClient.prices.list({ product: body.id, active: true, limit: 100 });
-    await Promise.all(prices.data.map((p) => stripeClient.prices.update(p.id, { active: false })));
-
-    await archiveCatalogProduct(body.id);
-
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, hardDeleted });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed";
     return NextResponse.json({ error: message }, { status: 400 });
