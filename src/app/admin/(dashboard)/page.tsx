@@ -101,7 +101,7 @@ export default function AdminHomePage() {
   if (!user) {
     return (
       <>
-        <div className="mx-auto max-w-lg rounded-[2rem] border border-outline-variant/20 bg-surface-container-lowest p-8 shadow-sm">
+        <div className="mx-auto max-w-lg rounded-[2rem] border border-outline-variant/20 bg-surface-container-lowest p-6 shadow-sm small:p-8">
           <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-tertiary">Admin</p>
           <h1 className="font-heading text-3xl font-bold tracking-tight text-on-surface">Panel de control</h1>
           <p className="mt-2 text-sm font-medium text-tertiary">
@@ -146,7 +146,7 @@ export default function AdminHomePage() {
 
   return (
     <>
-      <header className="mb-12 flex flex-col gap-6 small:flex-row small:items-end small:justify-between">
+      <header className="mb-8 flex flex-col gap-6 small:mb-12 small:flex-row small:items-end small:justify-between">
         <div>
           <h1 className="font-heading text-4xl font-bold tracking-tight text-on-surface">Overview</h1>
           <p className="mt-2 font-medium text-tertiary">Welcome back to the Panka Editorial dashboard.</p>
@@ -170,7 +170,7 @@ export default function AdminHomePage() {
       </header>
 
       <section className="mb-12 grid grid-cols-1 gap-6 md:grid-cols-3">
-        <div className="flex flex-col justify-between rounded-[2rem] border-b-4 border-primary/20 bg-surface-container-lowest p-8 shadow-sm">
+        <div className="flex flex-col justify-between rounded-[2rem] border-b-4 border-primary/20 bg-surface-container-lowest p-6 shadow-sm small:p-8">
           <div className="flex items-start justify-between">
             <div className="rounded-2xl bg-primary-fixed-dim/20 p-3 text-primary">
               <HiOutlineCurrencyDollar className="h-6 w-6" aria-hidden />
@@ -191,7 +191,7 @@ export default function AdminHomePage() {
           </div>
         </div>
 
-        <div className="flex flex-col justify-between rounded-[2rem] border-b-4 border-secondary-fixed-dim/40 bg-surface-container-lowest p-8 shadow-sm">
+        <div className="flex flex-col justify-between rounded-[2rem] border-b-4 border-secondary-fixed-dim/40 bg-surface-container-lowest p-6 shadow-sm small:p-8">
           <div className="flex items-start justify-between">
             <div className="rounded-2xl bg-secondary-container/30 p-3 text-secondary">
               <HiOutlineShoppingBag className="h-6 w-6" aria-hidden />
@@ -206,7 +206,7 @@ export default function AdminHomePage() {
           </div>
         </div>
 
-        <div className="flex flex-col justify-between rounded-[2rem] border-b-4 border-tertiary/20 bg-surface-container-lowest p-8 shadow-sm">
+        <div className="flex flex-col justify-between rounded-[2rem] border-b-4 border-tertiary/20 bg-surface-container-lowest p-6 shadow-sm small:p-8">
           <div className="flex items-start justify-between">
             <div className="rounded-2xl bg-surface-container-highest p-3 text-tertiary">
               <HiOutlineStar className="h-6 w-6" aria-hidden />
@@ -221,7 +221,7 @@ export default function AdminHomePage() {
       </section>
 
       <section className="overflow-hidden rounded-[2.5rem] bg-surface-container-lowest shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-outline-variant/10 bg-surface-container-low/50 p-8 small:flex-row small:items-center small:justify-between">
+        <div className="flex flex-col gap-4 border-b border-outline-variant/10 bg-surface-container-low/50 p-5 small:flex-row small:p-8 small:items-center small:justify-between">
           <div>
             <h3 className="font-heading text-2xl font-bold">Recent Orders</h3>
             <p className="text-sm text-tertiary">Pedidos reales desde Stripe + Firestore</p>
@@ -232,20 +232,20 @@ export default function AdminHomePage() {
           </Link>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left">
+          <table className="w-full min-w-[620px] border-collapse text-left">
             <thead>
               <tr className="border-b border-outline-variant/10 text-[10px] font-bold uppercase tracking-[0.2em] text-tertiary">
-                <th className="px-8 py-6">Order ID</th>
-                <th className="px-8 py-6">Customer</th>
-                <th className="px-8 py-6">Status</th>
-                <th className="px-8 py-6 text-right">Total</th>
-                <th className="px-8 py-6 text-center">Action</th>
+                <th className="px-4 py-4 small:px-8 small:py-6">Order ID</th>
+                <th className="px-4 py-4 small:px-8 small:py-6">Customer</th>
+                <th className="px-4 py-4 small:px-8 small:py-6">Status</th>
+                <th className="px-4 py-4 small:px-8 small:py-6 text-right">Total</th>
+                <th className="px-4 py-4 small:px-8 small:py-6 text-center">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/10">
               {orders.slice(0, 6).length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-8 py-10 text-sm text-tertiary">
+                  <td colSpan={5} className="px-4 py-10 text-sm small:px-8 text-tertiary">
                     Aún no hay pedidos. Cuando un cliente pague, aparece aquí.
                   </td>
                 </tr>
@@ -267,8 +267,8 @@ export default function AdminHomePage() {
                           : "new";
                   return (
                     <tr key={row.id} className="group transition-colors hover:bg-surface-container-low">
-                      <td className="px-8 py-5 font-mono text-sm text-on-surface-variant">{row.id.slice(0, 18)}…</td>
-                      <td className="px-8 py-5">
+                      <td className="px-4 py-4 small:px-8 small:py-5 font-mono text-sm text-on-surface-variant">{row.id.slice(0, 18)}…</td>
+                      <td className="px-4 py-4 small:px-8 small:py-5">
                         <div className="flex items-center gap-3">
                           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-container-highest text-xs font-bold">
                             {initials}
@@ -276,7 +276,7 @@ export default function AdminHomePage() {
                           <span className="font-semibold">{row.customer.name || row.customer.email || "—"}</span>
                         </div>
                       </td>
-                      <td className="px-8 py-5">
+                      <td className="px-4 py-4 small:px-8 small:py-5">
                         {tone === "ok" && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-panka-green-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-panka-green-600">
                             <span className="h-1.5 w-1.5 rounded-full bg-panka-green-500" />
@@ -302,8 +302,8 @@ export default function AdminHomePage() {
                           </span>
                         )}
                       </td>
-                      <td className="px-8 py-5 text-right font-bold">${row.total.toFixed(2)}</td>
-                      <td className="px-8 py-5 text-center">
+                      <td className="px-4 py-4 small:px-8 small:py-5 text-right font-bold">${row.total.toFixed(2)}</td>
+                      <td className="px-4 py-4 small:px-8 small:py-5 text-center">
                         <Link
                           href="/admin/pedidos"
                           className="rounded-lg p-2 inline-flex hover:bg-surface-container"
@@ -319,7 +319,7 @@ export default function AdminHomePage() {
             </tbody>
           </table>
         </div>
-        <div className="flex flex-col gap-4 border-t border-outline-variant/10 p-8 small:flex-row small:items-center small:justify-between">
+        <div className="flex flex-col gap-4 border-t border-outline-variant/10 p-5 small:flex-row small:p-8 small:items-center small:justify-between">
           <p className="text-xs font-medium text-tertiary">
             Showing {Math.min(6, orders.length)} of {orders.length} orders
           </p>
@@ -333,7 +333,7 @@ export default function AdminHomePage() {
       </section>
 
       <footer className="mt-12 flex flex-col gap-8 md:flex-row md:items-start">
-        <div className="flex-1 rounded-[2rem] border border-secondary-fixed-dim/30 bg-secondary-fixed-dim/20 p-8">
+        <div className="flex-1 rounded-[2rem] border border-secondary-fixed-dim/30 bg-secondary-fixed-dim/20 p-6 small:p-8">
           <div className="mb-4 flex items-center gap-4">
             <HiOutlineSparkles className="h-6 w-6 text-secondary" aria-hidden />
             <h4 className="text-lg font-bold">Kitchen queue</h4>
@@ -346,7 +346,7 @@ export default function AdminHomePage() {
             Open orders
           </Link>
         </div>
-        <div className="w-full rounded-[2rem] bg-surface-container-high p-8 md:w-1/3">
+        <div className="w-full rounded-[2rem] bg-surface-container-high p-6 small:p-8 md:w-1/3">
           <h4 className="mb-6 font-heading text-lg font-bold">Last payment</h4>
           <p className="text-sm text-tertiary">
             {orders[0]

@@ -333,7 +333,7 @@ export default function AdminProductosPage() {
 
   return (
     <>
-      <header className="mb-10">
+      <header className="mb-6 small:mb-10">
         <div className="flex flex-col gap-3 small:flex-row small:items-end small:justify-between">
           <div>
             <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-tertiary">Menu Management</p>
@@ -363,9 +363,9 @@ export default function AdminProductosPage() {
 
       <section>
         <div className="mx-auto max-w-7xl">
-          <div className="grid grid-cols-1 gap-8 small:grid-cols-3">
-            <div className="small:col-span-1">
-              <div className="rounded-2xl border border-grey-10 bg-white p-6">
+          <div className="grid grid-cols-1 gap-8 large:grid-cols-3">
+            <div className="large:col-span-1">
+              <div className="rounded-2xl border border-grey-10 bg-white p-4 xsmall:p-6">
                 <div className="mb-5">
                   <p className="text-sm font-semibold uppercase tracking-widest text-grey-30">Nuevo</p>
                   <h2 className="mt-1 text-lg font-bold text-grey-80">Crear producto</h2>
@@ -594,9 +594,9 @@ export default function AdminProductosPage() {
               </div>
             </div>
 
-            <div className="small:col-span-2">
-              <div className="rounded-2xl border border-grey-10 bg-white p-6">
-                <h2 className="mb-5 text-lg font-bold text-grey-80">Productos</h2>
+            <div className="large:col-span-2">
+              <div className="rounded-2xl border border-grey-10 bg-white p-3 xsmall:p-6">
+                <h2 className="mb-5 px-1 text-lg font-bold text-grey-80 xsmall:px-0">Productos</h2>
                 <div className="space-y-4">
                   {items.length === 0 ? (
                     <p className="text-sm text-grey-40">No hay productos.</p>
@@ -605,12 +605,12 @@ export default function AdminProductosPage() {
                       .map((p, index) => (
                         <div
                           key={p.id}
-                          className={`rounded-2xl border border-grey-10 p-5 transition-all ${
+                          className={`rounded-2xl border border-grey-10 p-3 transition-all xsmall:p-5 ${
                             p.active ? "bg-white" : "bg-grey-5/60 opacity-80"
                           }`}
                         >
-                          <div className="flex flex-col gap-4 small:flex-row small:items-start small:justify-between">
-                            <div className="flex items-start gap-4 min-w-0">
+                          <div className="flex flex-col gap-4">
+                            <div className="flex min-w-0 items-start gap-3 xsmall:gap-4">
                               <div className="flex shrink-0 flex-col items-center gap-1">
                                 <button
                                   onClick={() => moveProduct(p.id, -1)}
@@ -642,9 +642,9 @@ export default function AdminProductosPage() {
                                   className="object-cover"
                                 />
                               </div>
-                            <div className="min-w-0">
+                            <div className="min-w-0 flex-1">
                               <div className="flex flex-wrap items-center gap-2">
-                                <p className="text-lg font-bold text-grey-80 truncate">
+                                <p className="break-words text-base font-bold text-grey-80 xsmall:text-lg">
                                   {p.name}
                                 </p>
                                 {!p.active && (

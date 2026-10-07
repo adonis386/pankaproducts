@@ -36,6 +36,33 @@ function formatWhen(iso: string | null) {
   }
 }
 
+function StatusSelect({
+  order,
+  disabled,
+  onChange,
+  className = "",
+}: {
+  order: PublicOrder;
+  disabled: boolean;
+  onChange: (status: KitchenStatus) => void;
+  className?: string;
+}) {
+  return (
+    <select
+      className={`rounded-lg border border-outline-variant/30 bg-surface-container-lowest px-3 py-2 text-sm ${className}`}
+      value={STATUSES.includes(order.status) ? order.status : "confirmed"}
+      disabled={disabled}
+      onChange={(e) => onChange(e.target.value as KitchenStatus)}
+    >
+      {STATUSES.map((status) => (
+        <option key={status} value={status}>
+          {status}
+        </option>
+      ))}
+    </select>
+  );
+}
+
 export default function AdminPedidosPage() {
   const { user, loading } = useAuth();
   const [orders, setOrders] = useState<PublicOrder[]>([]);
@@ -122,7 +149,52 @@ export default function AdminPedidosPage() {
         </p>
       ) : null}
 
-      <div className="overflow-hidden rounded-[2rem] bg-surface-container-lowest">
+      <div className="space-y-3 small:hidden">
+        {orders.length === 0 ? (
+          <p className="rounded-2xl bg-surface-container-lowest p-5 text-sm text-tertiary">
+            {busy ? "Cargando…" : "Aún no hay pedidos pagados."}
+          </p>
+        ) : (
+          orders.map((order) => (
+            <article key={order.id} className="rounded-2xl bg-surface-container-lowest p-4 shadow-sm">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-semibold">{order.customer.name || "—"}</p>
+                  <p className="text-xs text-tertiary">{formatWhen(order.createdAt)}</p>
+                </div>
+                <p className="shrink-0 font-bold">{formatMoney(order.total, order.currency)}</p>
+              </div>
+              <div className="mt-3 text-sm">
+                {order.items.map((item, idx) => (
+                  <p key={`${order.id}-m-${idx}`}>
+                    {item.quantity}× {item.name}
+                  </p>
+                ))}
+              </div>
+              <div className="mt-3 space-y-0.5 text-xs text-tertiary">
+                {order.customer.phone && (
+                  <a href={`tel:${order.customer.phone}`} className="block font-semibold text-primary">
+                    {order.customer.phone}
+                  </a>
+                )}
+                <p className="break-words">
+                  {order.customer.address}
+                  {order.customer.city ? `, ${order.customer.city}` : ""}
+                </p>
+                <p className="break-all">{order.customer.email}</p>
+              </div>
+              <StatusSelect
+                className="mt-4 w-full"
+                order={order}
+                disabled={busy}
+                onChange={(status) => void changeStatus(order.id, status)}
+              />
+            </article>
+          ))
+        )}
+      </div>
+
+      <div className="hidden overflow-hidden rounded-[2rem] bg-surface-container-lowest small:block">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left">
             <thead>
@@ -165,18 +237,11 @@ export default function AdminPedidosPage() {
                       ))}
                     </td>
                     <td className="px-6 py-5">
-                      <select
-                        className="rounded-lg border border-outline-variant/30 bg-surface-container-lowest px-3 py-2 text-sm"
-                        value={STATUSES.includes(order.status) ? order.status : "confirmed"}
+                      <StatusSelect
+                        order={order}
                         disabled={busy}
-                        onChange={(e) => void changeStatus(order.id, e.target.value as KitchenStatus)}
-                      >
-                        {STATUSES.map((status) => (
-                          <option key={status} value={status}>
-                            {status}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(status) => void changeStatus(order.id, status)}
+                      />
                     </td>
                     <td className="px-6 py-5 text-right font-bold">
                       {formatMoney(order.total, order.currency)}

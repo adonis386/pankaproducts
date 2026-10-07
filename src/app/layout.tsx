@@ -11,6 +11,7 @@ import { LanguageProvider } from "@/context/LanguageContext";
 import { CatalogProvider } from "@/context/CatalogContext";
 import CookieConsent from "@/components/CookieConsent";
 import SkipToContent from "@/components/SkipToContent";
+import StoreOnly from "@/components/StoreOnly";
 
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta",
@@ -52,14 +53,18 @@ export default function RootLayout({
             <CartProvider>
               <CatalogProvider>
                 <SkipToContent />
-                <AnnouncementBar />
-                <Navbar />
-                <CartDrawer />
+                <StoreOnly>
+                  <AnnouncementBar />
+                  <Navbar />
+                  <CartDrawer />
+                </StoreOnly>
                 <main id="main-content" className="min-h-screen">
                   {children}
                 </main>
-                <Footer />
-                <CookieConsent />
+                <StoreOnly>
+                  <Footer />
+                  <CookieConsent />
+                </StoreOnly>
               </CatalogProvider>
             </CartProvider>
           </AuthProvider>
