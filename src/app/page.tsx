@@ -7,12 +7,14 @@ import Newsletter from "@/components/Newsletter";
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 import { useCatalog } from "@/context/CatalogContext";
+import { useSettings } from "@/context/SettingsContext";
 import ProductCardSkeleton from "@/components/ProductCardSkeleton";
 import ProductCard from "@/components/ProductCard";
 import Link from "next/link";
 
 export default function Home() {
-  const { t } = useLanguage();
+  const { locale, t } = useLanguage();
+  const { settings } = useSettings();
   const { products, loading } = useCatalog();
   const popular = products.filter((p) => p.isPopular);
   const salados = products.filter((p) => p.category === "salados");
@@ -83,43 +85,45 @@ export default function Home() {
 
       <DeliveryInfo />
 
-      {/* Banner */}
-      <section className="py-20 bg-surface">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="relative overflow-hidden rounded-3xl bg-surface-container shadow-[var(--shadow-editorial-lg)]">
-            <div className="grid grid-cols-1 small:grid-cols-2">
-              <div className="relative z-10 flex flex-col justify-center px-8 py-14 small:px-14 small:py-20">
-                <span className="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-secondary">
-                  {bannerTag}
-                </span>
-                <h3 className="mb-4 max-w-xl font-heading text-4xl font-bold leading-[1.15] text-on-surface">
-                  {t("home.allTamales")}
-                </h3>
-                <p className="mb-8 max-w-sm text-base leading-relaxed text-tertiary">
-                  {t("home.bannerDesc")}
-                </p>
-                <a
-                  href={bannerHref}
-                  className="w-fit rounded-xl bg-gradient-to-br from-primary to-primary-container px-7 py-3.5 text-base font-semibold text-on-primary shadow-[var(--shadow-editorial)] transition-all hover:brightness-[1.02]"
-                >
-                  {t("home.discover")}
-                </a>
-              </div>
-              <div className="relative min-h-[250px]">
-                <Image
-                  src="/hero_3.jpg"
-                  alt={t("hero.carouselSlide1Alt")}
-                  fill
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-surface-container via-surface-container/30 to-transparent small:from-surface-container/70" />
-                <div className="pointer-events-none absolute -bottom-10 -left-10 h-40 w-40 rounded-circle bg-secondary-container/35 blur-3xl" />
-                <div className="pointer-events-none absolute -top-10 -right-10 h-52 w-52 rounded-circle bg-primary-container/25 blur-3xl" />
+      {/* Promotional Banner */}
+      {settings.promoBanner?.active !== false && (
+        <section className="py-20 bg-surface">
+          <div className="mx-auto max-w-7xl px-6">
+            <div className="relative overflow-hidden rounded-3xl bg-surface-container shadow-[var(--shadow-editorial-lg)]">
+              <div className="grid grid-cols-1 small:grid-cols-2">
+                <div className="relative z-10 flex flex-col justify-center px-8 py-14 small:px-14 small:py-20">
+                  <span className="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-secondary">
+                    {settings.promoBanner?.tag?.[locale] || bannerTag}
+                  </span>
+                  <h3 className="mb-4 max-w-xl font-heading text-4xl font-bold leading-[1.15] text-on-surface">
+                    {settings.promoBanner?.title?.[locale] || t("home.allTamales")}
+                  </h3>
+                  <p className="mb-8 max-w-sm text-base leading-relaxed text-tertiary whitespace-pre-line">
+                    {settings.promoBanner?.description?.[locale] || t("home.bannerDesc")}
+                  </p>
+                  <Link
+                    href={settings.promoBanner?.buttonHref || bannerHref}
+                    className="w-fit rounded-xl bg-gradient-to-br from-primary to-primary-container px-7 py-3.5 text-base font-semibold text-on-primary shadow-[var(--shadow-editorial)] transition-all hover:brightness-[1.02]"
+                  >
+                    {settings.promoBanner?.buttonText?.[locale] || t("home.discover")}
+                  </Link>
+                </div>
+                <div className="relative min-h-[250px]">
+                  <Image
+                    src={settings.promoBanner?.image || "/hero_3.jpg"}
+                    alt={settings.promoBanner?.title?.[locale] || "Promoción Panka"}
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-surface-container via-surface-container/30 to-transparent small:from-surface-container/70" />
+                  <div className="pointer-events-none absolute -bottom-10 -left-10 h-40 w-40 rounded-circle bg-secondary-container/35 blur-3xl" />
+                  <div className="pointer-events-none absolute -top-10 -right-10 h-52 w-52 rounded-circle bg-primary-container/25 blur-3xl" />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {!loading && !onlyOneCategory && salados.length > 0 && (
         <ProductCarousel title={t("home.savory")} products={salados} href="/productos?cat=salados" />

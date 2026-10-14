@@ -28,7 +28,7 @@ const nav: NavItem[] = [
   { href: "/admin", label: "Dashboard", icon: HiOutlineViewGrid, exact: true },
   { href: "/admin/productos", label: "Menu Management", icon: HiOutlineViewList, exact: false },
   { href: "/admin/pedidos", label: "Orders", icon: HiOutlineReceiptRefund, exact: false },
-  { href: "#settings", label: "Settings", icon: HiOutlineCog, exact: false, disabled: true },
+  { href: "/admin/settings", label: "Settings & Content", icon: HiOutlineCog, exact: false },
 ];
 
 function isActive(pathname: string, href: string, exact: boolean) {

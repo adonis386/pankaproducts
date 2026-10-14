@@ -9,9 +9,11 @@ import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { CatalogProvider } from "@/context/CatalogContext";
+import { SettingsProvider } from "@/context/SettingsContext";
 import CookieConsent from "@/components/CookieConsent";
 import SkipToContent from "@/components/SkipToContent";
 import StoreOnly from "@/components/StoreOnly";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta",
@@ -48,27 +50,30 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${plusJakarta.variable} ${notoSerif.variable} font-sans antialiased`}>
-        <LanguageProvider>
-          <AuthProvider>
-            <CartProvider>
-              <CatalogProvider>
-                <SkipToContent />
-                <StoreOnly>
-                  <AnnouncementBar />
-                  <Navbar />
-                  <CartDrawer />
-                </StoreOnly>
-                <main id="main-content" className="min-h-screen">
-                  {children}
-                </main>
-                <StoreOnly>
-                  <Footer />
-                  <CookieConsent />
-                </StoreOnly>
-              </CatalogProvider>
-            </CartProvider>
-          </AuthProvider>
-        </LanguageProvider>
+        <SettingsProvider>
+          <LanguageProvider>
+            <AuthProvider>
+              <CartProvider>
+                <CatalogProvider>
+                  <SkipToContent />
+                  <StoreOnly>
+                    <AnnouncementBar />
+                    <Navbar />
+                    <CartDrawer />
+                  </StoreOnly>
+                  <main id="main-content" className="min-h-screen">
+                    {children}
+                  </main>
+                  <StoreOnly>
+                    <Footer />
+                    <CookieConsent />
+                    <WhatsAppButton />
+                  </StoreOnly>
+                </CatalogProvider>
+              </CartProvider>
+            </AuthProvider>
+          </LanguageProvider>
+        </SettingsProvider>
       </body>
     </html>
   );

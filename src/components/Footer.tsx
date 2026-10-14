@@ -3,9 +3,23 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSettings } from "@/context/SettingsContext";
 
 export default function Footer() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
+  const { settings } = useSettings();
+
+  const email = settings.contact.email || "hello@pankatamales.com";
+  const phone = settings.contact.phone || "+1 (954) 901-4340";
+  const rawWa = settings.contact.whatsapp || "19549014340";
+  const waClean = rawWa.replace(/[^0-9]/g, "");
+  const phoneClean = phone.replace(/[^0-9+]/g, "");
+  const footerDesc = settings.contact.footerDesc?.[locale] || t("footer.desc");
+  const waMessage = encodeURIComponent(
+    locale === "es"
+      ? "¡Hola Panka! Me gustaría hacer un pedido de tamales por WhatsApp."
+      : "Hello Panka! I would like to place a tamales order via WhatsApp."
+  );
 
   const sections = [
     {
@@ -28,9 +42,9 @@ export default function Footer() {
     {
       title: t("footer.contact"),
       links: [
-        { href: "mailto:hello@pankatamales.com", label: "hello@pankatamales.com" },
-        { href: "tel:+13054001234", label: "+1 (305) 400-1234" },
-        { href: "https://wa.me/13054001234", label: t("footer.whatsapp") },
+        { href: `mailto:${email}`, label: email },
+        { href: `tel:${phoneClean}`, label: phone },
+        { href: `https://wa.me/${waClean}?text=${waMessage}`, label: `WhatsApp: ${phone}` },
       ],
     },
   ];
@@ -45,7 +59,7 @@ export default function Footer() {
               <span className="sr-only">Panka</span>
             </Link>
             <p className="mt-3 max-w-xs text-base leading-relaxed text-tertiary/90">
-              {t("footer.desc")}
+              {footerDesc}
             </p>
           </div>
 

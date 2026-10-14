@@ -10,6 +10,8 @@ import { getProductImages } from "@/lib/product-images";
 import { getProductImageAlt } from "@/lib/product-alt";
 import { Product } from "@/lib/types";
 import ProductImageCarousel from "@/components/ProductImageCarousel";
+import { FaWhatsapp } from "react-icons/fa";
+import { useSettings } from "@/context/SettingsContext";
 
 interface ProductDetailsModalProps {
   product: Product | null;
@@ -20,6 +22,7 @@ interface ProductDetailsModalProps {
 export default function ProductDetailsModal({ product, isOpen, onClose }: ProductDetailsModalProps) {
   const { addItem } = useCart();
   const { t, locale } = useLanguage();
+  const { settings } = useSettings();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
@@ -69,11 +72,18 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
               />
 
               <div className="flex flex-col justify-center">
-                {product.isPopular && (
-                  <div className="mb-2 inline-flex w-fit items-center rounded-lg bg-panka-green-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-panka-green-600">
-                    {t("product.popular")}
-                  </div>
-                )}
+                <div className="mb-2 flex flex-wrap gap-2">
+                  {product.isPopular && (
+                    <div className="inline-flex w-fit items-center rounded-lg bg-panka-green-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-panka-green-600">
+                      {t("product.popular")}
+                    </div>
+                  )}
+                  {product.freeDelivery && (
+                    <div className="inline-flex w-fit items-center rounded-lg bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary">
+                      {locale === "es" ? "🚚 Envío Gratis" : "🚚 Free Delivery"}
+                    </div>
+                  )}
+                </div>
 
                 <h2 className="mb-1 font-heading text-2xl font-bold text-panka-brown-500 small:text-3xl">
                   {product.name}
@@ -81,7 +91,7 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
                 <p className="mb-3 text-lg font-bold text-panka-brown-500 small:text-xl">
                   ${product.price.toFixed(2)}
                 </p>
-                <p className="mb-3 text-sm leading-relaxed text-grey-50 small:mb-4 small:text-base">
+                <p className="mb-3 text-sm leading-relaxed text-grey-50 small:mb-4 small:text-base whitespace-pre-line">
                   {product.description}
                 </p>
 
@@ -113,6 +123,19 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
             >
               {t("product.addToCart")}
             </button>
+            <a
+              href={`https://wa.me/${(settings.contact.whatsapp || "19549014340").replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                locale === "es"
+                  ? `¡Hola Panka! Me gustaría hacer un pedido por WhatsApp del tamal: "${product.name}" ($${product.price.toFixed(2)}).`
+                  : `Hello Panka! I would like to order via WhatsApp: "${product.name}" ($${product.price.toFixed(2)}).`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-600/30 bg-emerald-50 py-3.5 text-base font-bold text-emerald-800 transition-all hover:bg-emerald-100"
+            >
+              <FaWhatsapp className="h-5 w-5 text-emerald-600 shrink-0" aria-hidden />
+              <span>{locale === "es" ? "Pedir por WhatsApp" : "Order on WhatsApp"}</span>
+            </a>
             <button
               onClick={onClose}
               className="w-full rounded-xl border border-grey-10 bg-white py-3.5 text-base font-semibold text-grey-70 transition-all hover:bg-grey-5"

@@ -22,6 +22,7 @@ type AdminProduct = {
   price: number | null;
   currency: string;
   defaultPriceId: string | null;
+  freeDelivery?: boolean;
 };
 
 async function getIdTokenOrThrow() {
@@ -94,6 +95,7 @@ export default function AdminProductosPage() {
     popular: false,
     active: true,
     isAvailable: true,
+    freeDelivery: false,
     sort: "" as number | "",
     description: "",
     category: "salados",
@@ -439,7 +441,7 @@ export default function AdminProductosPage() {
                           placeholder="Opcional"
                         />
                       </div>
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
                         <label className="inline-flex items-center gap-2 text-sm font-medium text-grey-60">
                           <input
                             type="checkbox"
@@ -455,6 +457,14 @@ export default function AdminProductosPage() {
                             onChange={(e) => setDraft((d) => ({ ...d, popular: e.target.checked }))}
                           />
                           Popular
+                        </label>
+                        <label className="inline-flex items-center gap-2 text-sm font-medium text-primary font-bold">
+                          <input
+                            type="checkbox"
+                            checked={draft.freeDelivery}
+                            onChange={(e) => setDraft((d) => ({ ...d, freeDelivery: e.target.checked }))}
+                          />
+                          🚚 Envío gratis
                         </label>
                       </div>
 
@@ -662,6 +672,11 @@ export default function AdminProductosPage() {
                                     Destacado
                                   </span>
                                 )}
+                                {p.freeDelivery && (
+                                  <span className="rounded-lg border border-primary/30 bg-primary/10 px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-primary">
+                                    🚚 Envío Gratis
+                                  </span>
+                                )}
                               </div>
                               <p className="text-sm text-grey-40 truncate">{p.id}</p>
                               <p className="mt-2 text-sm text-grey-50">
@@ -704,6 +719,17 @@ export default function AdminProductosPage() {
                                 className="rounded-xl border border-grey-10 bg-white px-4 py-2 text-sm font-semibold text-grey-70 hover:bg-grey-5 disabled:opacity-50"
                               >
                                 {p.popular ? "Quitar popular" : "Marcar popular"}
+                              </button>
+                              <button
+                                onClick={() => updateProduct({ id: p.id, freeDelivery: !p.freeDelivery })}
+                                disabled={busy || !p.active}
+                                className={`rounded-xl border px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-50 ${
+                                  p.freeDelivery
+                                    ? "border-primary/40 bg-primary/10 text-primary hover:bg-primary/20"
+                                    : "border-grey-10 bg-white text-grey-70 hover:bg-grey-5"
+                                }`}
+                              >
+                                {p.freeDelivery ? "Quitar envío gratis" : "Poner envío gratis"}
                               </button>
                               <button
                                 onClick={() => deleteProduct(p.id)}
@@ -778,14 +804,15 @@ export default function AdminProductosPage() {
                               </label>
                               <textarea
                                 value={edits[p.id]?.description ?? p.description}
-                                rows={2}
+                                rows={4}
                                 onChange={(e) =>
                                   setEdits((m) => ({
                                     ...m,
                                     [p.id]: { ...(m[p.id] || {}), description: e.target.value },
                                   }))
                                 }
-                                className="w-full resize-none rounded-xl border border-grey-20 bg-grey-5 px-4 py-3 text-sm text-grey-80 outline-none focus:border-panka-green-400 focus:ring-2 focus:ring-panka-green-50"
+                                placeholder="Escribe la descripción (los saltos de línea y párrafos se mostrarán tal cual en la tienda)..."
+                                className="w-full resize-y rounded-xl border border-grey-20 bg-grey-5 px-4 py-3 text-sm text-grey-80 outline-none focus:border-panka-green-400 focus:ring-2 focus:ring-panka-green-50"
                               />
                             </div>
                             <div className="xsmall:col-span-2 flex justify-end">

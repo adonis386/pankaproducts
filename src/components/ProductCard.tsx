@@ -41,11 +41,18 @@ export default function ProductCard({ product, compact, onSelect }: ProductCardP
           sizes={compact ? "220px" : "(max-width: 640px) 100vw, 33vw"}
           className="object-contain transition-transform duration-500 group-hover:scale-[1.02]"
         />
-        {product.isPopular && (
-          <span className="absolute left-4 top-4 rounded-full bg-surface/80 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary backdrop-blur-sm">
-            {t("product.popular")}
-          </span>
-        )}
+        <div className="absolute left-4 top-4 flex flex-col gap-1.5">
+          {product.isPopular && (
+            <span className="rounded-full bg-surface/85 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary backdrop-blur-sm">
+              {t("product.popular")}
+            </span>
+          )}
+          {product.freeDelivery && (
+            <span className="rounded-full bg-primary px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-on-primary shadow-sm backdrop-blur-sm">
+              {locale === "es" ? "Envío Gratis" : "Free Delivery"}
+            </span>
+          )}
+        </div>
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -81,7 +88,11 @@ export default function ProductCard({ product, compact, onSelect }: ProductCardP
           </div>
         )}
 
-        {!compact && <p className="mb-5 text-sm leading-relaxed text-tertiary line-clamp-2">{product.description}</p>}
+        {!compact && (
+          <p className="mb-5 text-sm leading-relaxed text-tertiary line-clamp-3 whitespace-pre-line">
+            {product.description}
+          </p>
+        )}
 
         {!compact && (
           <button

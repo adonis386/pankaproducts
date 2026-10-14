@@ -14,6 +14,8 @@ export interface Product {
   active?: boolean;
   /** Daily kitchen availability; false hides buy CTA / blocks checkout. */
   isAvailable?: boolean;
+  /** Free shipping / delivery flag */
+  freeDelivery?: boolean;
 }
 
 export interface CartItem {

@@ -1,30 +1,39 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { HiX } from "react-icons/hi";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSettings } from "@/context/SettingsContext";
 
 export default function AnnouncementBar() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
+  const { settings } = useSettings();
   const [current, setCurrent] = useState(0);
   const [visible, setVisible] = useState(true);
 
-  const messages = [t("announce.1"), t("announce.2"), t("announce.3")];
+  const activeAnnouncements = useMemo(() => {
+    const list = settings.announcements.filter((a) => a.active);
+    if (list.length > 0) {
+      return list.map((a) => (locale === "es" ? a.textEs : a.textEn));
+    }
+    return [t("announce.1"), t("announce.2"), t("announce.3")];
+  }, [settings.announcements, locale, t]);
 
   useEffect(() => {
+    if (activeAnnouncements.length <= 1) return;
     const timer = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % 3);
-    }, 4000);
+      setCurrent((prev) => (prev + 1) % activeAnnouncements.length);
+    }, 4500);
     return () => clearInterval(timer);
-  }, []);
+  }, [activeAnnouncements.length]);
 
-  if (!visible) return null;
+  if (!visible || activeAnnouncements.length === 0) return null;
 
   return (
     <div className="relative bg-panka-brown-500 text-white">
       <div className="mx-auto flex max-w-7xl items-center justify-center px-10 py-2.5">
         <p className="text-center text-sm font-medium tracking-wide transition-opacity duration-500">
-          {messages[current]}
+          {activeAnnouncements[current]}
         </p>
         <button
           onClick={() => setVisible(false)}

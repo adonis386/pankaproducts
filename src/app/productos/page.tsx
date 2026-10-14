@@ -1,112 +1,78 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import ProductCard from "@/components/ProductCard";
+import type { Metadata } from "next";
+import { getPublicCatalog } from "@/lib/catalog-server";
 import { Product } from "@/lib/types";
-import { useLanguage } from "@/context/LanguageContext";
-import { useCatalog } from "@/context/CatalogContext";
-import ProductDetailsModal from "@/components/ProductDetailsModal";
-import ProductCardSkeleton from "@/components/ProductCardSkeleton";
+import ProductosClient from "./productos-client";
 
-export default function ProductosPage() {
-  const { t } = useLanguage();
-  const { products, loading, error } = useCatalog();
-  const [activeCategory, setActiveCategory] = useState<Product["category"] | "todos">("todos");
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+const SITE_URL = "https://www.pankaproducts.com";
 
-  const hasSalados = products.some((p) => p.category === "salados");
-  const hasDulces = products.some((p) => p.category === "dulces");
-  const hasEspeciales = products.some((p) => p.category === "especiales");
+// Rebuilt on a timer rather than on every hit: the client refetches the
+// catalog on mount, so a few minutes of staleness is only ever seen by
+// crawlers, and never turns into a wrong price at checkout.
+export const revalidate = 300;
 
-  const availableCategories: Array<{ value: Product["category"]; label: string }> = [];
-  if (hasSalados) availableCategories.push({ value: "salados", label: t("productos.savory") });
-  if (hasDulces) availableCategories.push({ value: "dulces", label: t("productos.sweet") });
-  if (hasEspeciales) availableCategories.push({ value: "especiales", label: t("productos.specials") });
+export const metadata: Metadata = {
+  title: "Tamales artesanales | Panka",
+  description:
+    "Tamales hechos a mano con masa nixtamalizada fresca: pollo, cerdo, vegano, humitas y combos. Entrega en Miami.",
+  alternates: { canonical: `${SITE_URL}/productos` },
+  openGraph: {
+    title: "Tamales artesanales | Panka",
+    description:
+      "Tamales hechos a mano con masa nixtamalizada fresca: pollo, cerdo, vegano, humitas y combos. Entrega en Miami.",
+    url: `${SITE_URL}/productos`,
+    type: "website",
+  },
+};
 
-  const categories: Array<{ value: "todos" | Product["category"]; label: string }> = [
-    { value: "todos", label: t("productos.all") },
-    ...availableCategories,
-  ];
+function buildStructuredData(products: Product[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Tamales artesanales Panka",
+    numberOfItems: products.length,
+    itemListElement: products.map((product, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "Product",
+        name: product.name,
+        description: product.description || product.name,
+        image: product.image.startsWith("http")
+          ? product.image
+          : `${SITE_URL}${product.image}`,
+        offers: {
+          "@type": "Offer",
+          price: product.price.toFixed(2),
+          priceCurrency: "USD",
+          availability:
+            product.isAvailable === false
+              ? "https://schema.org/OutOfStock"
+              : "https://schema.org/InStock",
+          url: `${SITE_URL}/productos`,
+        },
+      },
+    })),
+  };
+}
 
-  const filtered =
-    activeCategory === "todos"
-      ? products
-      : products.filter((p) => p.category === activeCategory);
-
-  useEffect(() => {
-    if (loading) return;
-    if (activeCategory === "todos") return;
-    const stillExists = products.some((p) => p.category === activeCategory);
-    if (!stillExists) setActiveCategory("todos");
-  }, [activeCategory, loading, products]);
+export default async function ProductosPage() {
+  // A catalog outage must not take the page down: the client still fetches on
+  // mount, so an empty server render degrades to the old behaviour.
+  const { products } = await getPublicCatalog().catch(() => ({
+    products: [] as Product[],
+  }));
 
   return (
     <>
-      <section className="bg-surface pb-10 pt-16">
-        <div className="mx-auto max-w-7xl px-6">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-secondary">
-            {t("productos.tag")}
-          </p>
-          <h1 className="mb-8 font-heading text-5xl font-bold text-on-surface small:text-6xl">
-            {t("productos.title")}
-          </h1>
-          <div className="flex flex-wrap gap-2">
-            {categories.map((cat) => (
-              <button
-                key={cat.value}
-                onClick={() => setActiveCategory(cat.value)}
-                className={`rounded-xl px-5 py-2.5 text-sm font-semibold uppercase tracking-widest transition-all ${
-                  activeCategory === cat.value
-                    ? "bg-primary text-on-primary shadow-[var(--shadow-editorial)]"
-                    : "bg-surface-container-highest text-secondary/80 shadow-[var(--shadow-editorial)] hover:bg-surface-variant hover:text-secondary"
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-10">
-        <div className="mx-auto max-w-7xl px-6">
-          {!!error && !loading && (
-            <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-              {error}
-            </div>
-          )}
-
-          {loading ? (
-            <div className="grid grid-cols-1 gap-8 xsmall:grid-cols-2 medium:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, idx) => (
-                <ProductCardSkeleton key={idx} />
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-8 xsmall:grid-cols-2 medium:grid-cols-3">
-              {filtered.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  onSelect={(p) => setSelectedProduct(p)}
-                />
-              ))}
-            </div>
-          )}
-
-          {!loading && filtered.length === 0 && (
-            <div className="py-20 text-center">
-              <p className="text-base text-grey-40">{t("productos.noResults")}</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      <ProductDetailsModal
-        product={selectedProduct}
-        isOpen={!!selectedProduct}
-        onClose={() => setSelectedProduct(null)}
-      />
+      {products.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(buildStructuredData(products)),
+          }}
+        />
+      )}
+      <ProductosClient initialProducts={products} />
     </>
   );
 }

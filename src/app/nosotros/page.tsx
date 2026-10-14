@@ -3,22 +3,53 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSettings } from "@/context/SettingsContext";
 
 const FANNY_SRC = "/assets/20-678x1024.jpg";
 const STORY_HERO_SRC = "/assets/photo3.jpg";
 
 export default function NosotrosPage() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
+  const { settings } = useSettings();
+  const story = settings.story;
+
+  const tag = story.tag?.[locale] || t("about.tag");
+  const title = story.title?.[locale] || t("about.title");
+  const sectionTitle = story.sectionTitle?.[locale] || t("about.storySectionTitle");
+  const since = story.since?.[locale] || t("about.since");
+  const p1 = story.p1?.[locale] || t("about.p1");
+  const p2 = story.p2?.[locale] || t("about.p2");
+  const p3 = story.p3?.[locale] || t("about.p3");
+  const fannyHeading = story.fannyHeading?.[locale] || t("about.fannyHeading");
+  const fannyRole = story.fannyRole?.[locale] || t("about.fannyRole");
+  const fannyP1 = story.fannyP1?.[locale] || t("about.fannyP1");
+  const fannyP2 = story.fannyP2?.[locale] || t("about.fannyP2");
+  const valuesTitle = story.valuesTitle?.[locale] || t("about.valuesTitle");
+
+  const values = [
+    {
+      title: story.passionTitle?.[locale] || t("about.passion"),
+      desc: story.passionDesc?.[locale] || t("about.passionDesc"),
+    },
+    {
+      title: story.traditionTitle?.[locale] || t("about.tradition"),
+      desc: story.traditionDesc?.[locale] || t("about.traditionDesc"),
+    },
+    {
+      title: story.communityTitle?.[locale] || t("about.community"),
+      desc: story.communityDesc?.[locale] || t("about.communityDesc"),
+    },
+  ];
 
   return (
     <>
       <section className="border-b border-outline-variant/20 bg-surface pb-12 pt-14">
         <div className="mx-auto max-w-7xl px-6">
           <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-tertiary">
-            {t("about.tag")}
+            {tag}
           </p>
           <h1 className="max-w-2xl font-heading text-4xl font-bold leading-tight text-on-surface small:text-5xl">
-            {t("about.title")}
+            {title}
           </h1>
         </div>
       </section>
@@ -41,15 +72,15 @@ export default function NosotrosPage() {
             </div>
             <div className="order-2">
               <h2 className="font-heading text-3xl font-bold text-on-surface md:text-4xl">
-                {t("about.storySectionTitle")}
+                {sectionTitle}
               </h2>
               <span className="mt-4 inline-block rounded-xl bg-primary/10 px-4 py-2 text-xs font-bold uppercase tracking-wider text-primary">
-                {t("about.since")}
+                {since}
               </span>
               <div className="mt-8 space-y-5 text-base leading-relaxed text-on-surface-variant md:text-lg">
-                <p>{t("about.p1")}</p>
-                <p>{t("about.p2")}</p>
-                <p dangerouslySetInnerHTML={{ __html: t("about.p3") }} />
+                <p>{p1}</p>
+                <p>{p2}</p>
+                <p dangerouslySetInnerHTML={{ __html: p3 }} />
               </div>
             </div>
           </div>
@@ -62,14 +93,14 @@ export default function NosotrosPage() {
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
             <div className="order-1 lg:order-1">
               <h2 className="font-heading text-4xl font-bold tracking-tight text-on-surface md:text-5xl">
-                {t("about.fannyHeading")}
+                {fannyHeading}
               </h2>
               <p className="mt-3 text-xs font-bold uppercase tracking-[0.2em] text-primary">
-                {t("about.fannyRole")}
+                {fannyRole}
               </p>
               <div className="mt-8 space-y-5 text-base leading-relaxed text-tertiary md:text-lg">
-                <p>{t("about.fannyP1")}</p>
-                <p>{t("about.fannyP2")}</p>
+                <p>{fannyP1}</p>
+                <p>{fannyP2}</p>
               </div>
             </div>
             <div className="order-2 lg:order-2">
@@ -90,14 +121,10 @@ export default function NosotrosPage() {
       <section className="border-t border-outline-variant/15 bg-surface py-16">
         <div className="mx-auto max-w-7xl px-6">
           <h2 className="mb-10 font-heading text-3xl font-bold text-on-surface">
-            {t("about.valuesTitle")}
+            {valuesTitle}
           </h2>
           <div className="grid grid-cols-1 gap-6 xsmall:grid-cols-3">
-            {[
-              { title: t("about.passion"), desc: t("about.passionDesc") },
-              { title: t("about.tradition"), desc: t("about.traditionDesc") },
-              { title: t("about.community"), desc: t("about.communityDesc") },
-            ].map((v) => (
+            {values.map((v) => (
               <div
                 key={v.title}
                 className="rounded-2xl border border-outline-variant/20 bg-surface-container-low/50 p-7 transition-all hover:shadow-[var(--shadow-editorial)]"

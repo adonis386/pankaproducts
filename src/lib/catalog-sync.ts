@@ -25,6 +25,7 @@ export type CatalogProductDoc = {
   stripePriceId: string;
   price: number;
   currency: string;
+  freeDelivery?: boolean;
 };
 
 export function slugify(input: string) {
@@ -88,6 +89,7 @@ export function mapStripeProductToCatalogDoc(
     stripePriceId: price?.id || "",
     price: unitAmount / 100,
     currency: price?.currency || "usd",
+    freeDelivery: parseBool(metadata.freeDelivery, false),
   };
 }
 
@@ -104,6 +106,7 @@ export function catalogDocToProduct(id: string, data: CatalogProductDoc): Produc
     isPopular: Boolean(data.isPopular),
     stock: typeof data.stock === "number" ? data.stock : 99,
     isAvailable: data.isAvailable !== false,
+    freeDelivery: Boolean(data.freeDelivery),
   };
 }
 

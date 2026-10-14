@@ -75,6 +75,7 @@ export async function GET(request: Request) {
             price: unitAmount != null ? unitAmount / 100 : null,
             currency: defaultPrice?.currency || "usd",
             defaultPriceId: defaultPrice?.id || null,
+            freeDelivery: p.metadata?.freeDelivery === "true" || p.metadata?.freeDelivery === "1",
           };
         })
     );
@@ -117,6 +118,7 @@ export async function POST(request: Request) {
       popular?: boolean;
       sort?: number;
       category?: string;
+      freeDelivery?: boolean;
     };
 
     if (!body.name || typeof body.price !== "number") {
@@ -139,6 +141,7 @@ export async function POST(request: Request) {
       image,
       ingredients: "",
       isAvailable: isAvailable ? "true" : "false",
+      freeDelivery: body.freeDelivery ? "true" : "false",
     };
 
     const product = await stripe.products.create({
@@ -193,6 +196,7 @@ export async function PATCH(request: Request) {
       sort?: number;
       category?: string;
       price?: number;
+      freeDelivery?: boolean;
     };
 
     if (!body.id) return NextResponse.json({ error: "Missing id." }, { status: 400 });
@@ -225,6 +229,12 @@ export async function PATCH(request: Request) {
       sort: body.sort == null ? currentMeta.sort ?? "9999" : String(body.sort),
       image: body.image ?? currentMeta.image ?? "",
       isAvailable: nextIsAvailable ? "true" : "false",
+      freeDelivery:
+        body.freeDelivery == null
+          ? currentMeta.freeDelivery ?? "false"
+          : body.freeDelivery
+            ? "true"
+            : "false",
     };
 
     const updated = await stripe.products.update(body.id, {

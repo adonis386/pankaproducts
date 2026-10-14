@@ -15,6 +15,7 @@ export const isStripeLiveMode = Boolean(secretKey?.startsWith("sk_live_"));
 // live catalog, and live orders never mix with test orders.
 export const CATALOG_COLLECTION = isStripeLiveMode ? "products_live" : "products";
 export const ORDERS_COLLECTION = isStripeLiveMode ? "orders_live" : "orders";
+export const SETTINGS_COLLECTION = isStripeLiveMode ? "site_settings_live" : "site_settings";
 
 export const stripe = secretKey
   ? new Stripe(secretKey, {

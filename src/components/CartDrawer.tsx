@@ -15,11 +15,14 @@ import {
 import { useCart } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useCatalog } from "@/context/CatalogContext";
+import { useSettings } from "@/context/SettingsContext";
+import { FaWhatsapp } from "react-icons/fa";
 import { getProductImageAlt } from "@/lib/product-alt";
 
 export default function CartDrawer() {
   const { items, isOpen, closeCart, removeItem, updateQuantity, addItem, totalPrice, totalItems } = useCart();
   const { t, locale } = useLanguage();
+  const { settings } = useSettings();
   const { products } = useCatalog();
   const [promoCode, setPromoCode] = useState("");
   const [promoMessage, setPromoMessage] = useState("");
@@ -257,6 +260,23 @@ export default function CartDrawer() {
                 {t("cart.proceedCheckout")}
                 <HiOutlineArrowRight className="h-5 w-5" aria-hidden />
               </Link>
+              <a
+                href={`https://wa.me/${(settings.contact.whatsapp || "19549014340").replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                  locale === "es"
+                    ? `¡Hola Panka! Quisiera hacer el siguiente pedido por WhatsApp:\n\n${items
+                        .map((i) => `• ${i.quantity}x ${i.product.name} — $${(i.product.price * i.quantity).toFixed(2)}`)
+                        .join("\n")}\n\nTotal estimado: $${totalPrice.toFixed(2)}`
+                    : `Hello Panka! I would like to place this order via WhatsApp:\n\n${items
+                        .map((i) => `• ${i.quantity}x ${i.product.name} — $${(i.product.price * i.quantity).toFixed(2)}`)
+                        .join("\n")}\n\nEstimated Total: $${totalPrice.toFixed(2)}`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-600/30 bg-emerald-50/80 py-3 text-xs font-bold text-emerald-800 transition-all hover:bg-emerald-100/90 active:scale-[0.98]"
+              >
+                <FaWhatsapp className="h-4 w-4 text-emerald-600 shrink-0" aria-hidden />
+                {locale === "es" ? "O pedir este carrito por WhatsApp" : "Or order this cart via WhatsApp"}
+              </a>
               <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-tertiary">
                 <span className="inline-flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-wider">
                   <HiOutlineGlobeAlt className="h-4 w-4 shrink-0" aria-hidden />
