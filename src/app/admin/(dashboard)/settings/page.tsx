@@ -14,6 +14,7 @@ import {
   HiOutlineShieldCheck,
   HiOutlineSpeakerphone,
   HiOutlineTrash,
+  HiOutlineUpload,
   HiOutlineUserAdd,
   HiOutlineUserRemove,
   HiOutlineUsers,
@@ -22,6 +23,19 @@ import { auth } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { DEFAULT_SITE_SETTINGS, type SiteSettings } from "@/lib/site-settings-types";
 import { useSettings } from "@/context/SettingsContext";
+
+const PRESET_GALLERY_IMAGES = [
+  { label: "Foto Tamales 1 (Mesa)", url: "/assets/photo2.jpg" },
+  { label: "Foto Tamales 2 (Detalle)", url: "/assets/photo3.jpg" },
+  { label: "Hero Portada 1 (Cocina)", url: "/hero_1.jpg" },
+  { label: "Hero Portada 2 (Vapor)", url: "/hero_2.jpg" },
+  { label: "Hero Portada 3 (Masa)", url: "/hero_3.jpg" },
+  { label: "Tamal Criollo de Cerdo", url: "/tamales/Tamales-de-Puerco.webp" },
+  { label: "Tamalito Verde de Pollo", url: "/tamales/tamalitos-verdes.webp" },
+  { label: "Humita Andina Dulce", url: "/tamales/humita.webp" },
+  { label: "Tamal Vegano Artesanal", url: "/tamales/tamal vegano.webp" },
+  { label: "Chicharrón de Cerdo", url: "/tamales/Chicharrón_fried_pork_rinds-e1630513624548.webp" },
+];
 
 async function getIdTokenOrThrow() {
   if (!auth?.currentUser) throw new Error("No authenticated user.");
@@ -51,6 +65,8 @@ export default function AdminSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [uploadingSlideId, setUploadingSlideId] = useState<string | null>(null);
+  const [uploadingPromoBanner, setUploadingPromoBanner] = useState<boolean>(false);
 
   // New admin form state
   const [newAdminEmail, setNewAdminEmail] = useState("");
@@ -116,6 +132,21 @@ export default function AdminSettingsPage() {
     setSaving(true);
     setErrorMessage("");
     try {
+      const sanitizedSettings: SiteSettings = {
+        ...settings,
+        hero: {
+          ...settings.hero,
+          slides: (settings.hero?.slides || []).map((s, idx) => ({
+            ...s,
+            src: s.src?.trim() || (idx % 2 === 0 ? "/assets/photo2.jpg" : "/assets/photo3.jpg"),
+          })),
+        },
+        promoBanner: {
+          ...settings.promoBanner,
+          image: settings.promoBanner?.image?.trim() || "/hero_3.jpg",
+        },
+      };
+
       const token = await getIdTokenOrThrow();
       const res = await fetch("/admin/api/settings", {
         method: "PATCH",
@@ -123,7 +154,7 @@ export default function AdminSettingsPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(settings),
+        body: JSON.stringify(sanitizedSettings),
       });
 
       const data = (await res.json()) as { ok?: boolean; error?: string; settings?: SiteSettings };
@@ -276,6 +307,54 @@ export default function AdminSettingsPage() {
         slides: (prev.hero?.slides || []).map((s) => (s.id === id ? { ...s, ...patch } : s)),
       },
     }));
+  };
+
+  const uploadImageFile = async (file: File): Promise<string> => {
+    const token = await getIdTokenOrThrow();
+    const fd = new FormData();
+    fd.append("file", file);
+
+    const res = await fetch("/admin/api/upload-image", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: fd,
+    });
+    const data = (await res.json()) as { url?: string; error?: string };
+    if (!res.ok || !data.url) {
+      throw new Error(data.error || "Error al subir la imagen.");
+    }
+    return data.url;
+  };
+
+  const handleSlideFileUpload = async (slideId: string, file: File) => {
+    setUploadingSlideId(slideId);
+    setErrorMessage("");
+    try {
+      const url = await uploadImageFile(file);
+      handleUpdateHeroSlide(slideId, { src: url });
+      showToast("Imagen subida y aplicada al slide.");
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : "Error al subir la imagen del slide.");
+    } finally {
+      setUploadingSlideId(null);
+    }
+  };
+
+  const handlePromoBannerFileUpload = async (file: File) => {
+    setUploadingPromoBanner(true);
+    setErrorMessage("");
+    try {
+      const url = await uploadImageFile(file);
+      setSettings((s) => ({
+        ...s,
+        promoBanner: { ...s.promoBanner, image: url },
+      }));
+      showToast("Imagen del banner subida y aplicada.");
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : "Error al subir la imagen del banner.");
+    } finally {
+      setUploadingPromoBanner(false);
+    }
   };
 
   if (authLoading || loading) {
@@ -708,16 +787,23 @@ export default function AdminSettingsPage() {
                   className="flex flex-col gap-4 rounded-2xl border border-outline-variant/20 bg-surface p-5 transition-all hover:border-outline-variant/40 md:flex-row md:items-center"
                 >
                   {/* Thumbnail Preview */}
-                  <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl border border-outline-variant/20 bg-surface-container">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={slide.src}
-                      alt={slide.altEs || "Preview"}
-                      className="h-full w-full object-cover"
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src = "/assets/photo2.jpg";
-                      }}
-                    />
+                  <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl border border-outline-variant/20 bg-surface-container flex items-center justify-center">
+                    {slide.src?.trim() ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={slide.src}
+                        alt={slide.altEs || "Preview"}
+                        className="h-full w-full object-cover"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = "/assets/photo2.jpg";
+                        }}
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center p-2 text-center">
+                        <HiOutlinePhotograph className="h-6 w-6 text-outline-variant" />
+                        <span className="text-[10px] font-bold text-error">Sin foto</span>
+                      </div>
+                    )}
                     <div className="absolute top-1 left-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white">
                       #{index + 1}
                     </div>
@@ -726,14 +812,71 @@ export default function AdminSettingsPage() {
                   {/* Inputs */}
                   <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-3">
                     <div className="sm:col-span-3">
-                      <label className="mb-1 block text-xs font-bold text-secondary">URL o Ruta de la Imagen</label>
+                      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                        <label className="text-xs font-bold text-secondary">Imagen del Slide</label>
+                        <div className="flex flex-wrap items-center gap-2">
+                          {/* File upload button */}
+                          <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary transition-all hover:bg-primary hover:text-on-primary">
+                            <HiOutlineUpload className="h-4 w-4 shrink-0" />
+                            <span>{uploadingSlideId === slide.id ? "Subiendo..." : "Subir imagen"}</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              disabled={uploadingSlideId === slide.id}
+                              className="hidden"
+                              onChange={(e) => {
+                                const f = e.target.files?.[0];
+                                if (f) void handleSlideFileUpload(slide.id, f);
+                              }}
+                            />
+                          </label>
+
+                          {/* Preset gallery dropdown */}
+                          <select
+                            onChange={(e) => {
+                              if (e.target.value) {
+                                handleUpdateHeroSlide(slide.id, { src: e.target.value });
+                              }
+                            }}
+                            value=""
+                            className="rounded-xl border border-outline-variant/30 bg-surface-container-lowest px-3 py-1.5 text-xs font-medium text-on-surface-variant focus:border-primary focus:outline-none"
+                            title="Seleccionar imagen de la galería de Panka"
+                          >
+                            <option value="" disabled>
+                              🖼️ Elegir de galería...
+                            </option>
+                            {PRESET_GALLERY_IMAGES.map((img) => (
+                              <option key={img.url} value={img.url}>
+                                {img.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
                       <input
                         type="text"
                         value={slide.src}
                         onChange={(e) => handleUpdateHeroSlide(slide.id, { src: e.target.value })}
-                        placeholder="/assets/photo2.jpg o https://..."
-                        className="w-full rounded-xl border border-outline-variant/30 bg-surface-container-lowest px-3.5 py-2 font-mono text-xs focus:border-primary focus:outline-none"
+                        placeholder="Ruta local (ej. /assets/photo2.jpg) o URL externa..."
+                        className={`w-full rounded-xl border px-3.5 py-2 font-mono text-xs focus:outline-none ${
+                          !slide.src?.trim()
+                            ? "border-error/50 bg-error/5 focus:border-error"
+                            : "border-outline-variant/30 bg-surface-container-lowest focus:border-primary"
+                        }`}
                       />
+                      {!slide.src?.trim() && (
+                        <div className="mt-1 flex items-center justify-between text-[11px] text-error font-medium">
+                          <span>⚠️ Si lo dejas vacío, el carrusel usará la imagen por defecto para no romperse.</span>
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateHeroSlide(slide.id, { src: "/assets/photo2.jpg" })}
+                            className="underline hover:text-error/80"
+                          >
+                            Restaurar por defecto
+                          </button>
+                        </div>
+                      )}
                     </div>
                     <div className="sm:col-span-1">
                       <label className="mb-1 block text-xs font-medium text-tertiary">Texto Alternativo (Español)</label>
@@ -1002,11 +1145,55 @@ export default function AdminSettingsPage() {
 
               {/* Banner Image */}
               <div className="rounded-2xl border border-outline-variant/20 bg-surface-container-low/40 p-5">
-                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
-                  Imagen del Banner
-                </label>
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-secondary">
+                    Imagen del Banner Promocional
+                  </label>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {/* File upload button */}
+                    <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary transition-all hover:bg-primary hover:text-on-primary">
+                      <HiOutlineUpload className="h-4 w-4 shrink-0" />
+                      <span>{uploadingPromoBanner ? "Subiendo..." : "Subir imagen"}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        disabled={uploadingPromoBanner}
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) void handlePromoBannerFileUpload(f);
+                        }}
+                      />
+                    </label>
+
+                    {/* Preset gallery dropdown */}
+                    <select
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          setSettings((s) => ({
+                            ...s,
+                            promoBanner: { ...s.promoBanner, image: e.target.value },
+                          }));
+                        }
+                      }}
+                      value=""
+                      className="rounded-xl border border-outline-variant/30 bg-surface-container-lowest px-3 py-1.5 text-xs font-medium text-on-surface-variant focus:border-primary focus:outline-none"
+                      title="Seleccionar imagen de la galería de Panka"
+                    >
+                      <option value="" disabled>
+                        🖼️ Elegir de galería...
+                      </option>
+                      {PRESET_GALLERY_IMAGES.map((img) => (
+                        <option key={img.url} value={img.url}>
+                          {img.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                  <div className="relative h-20 w-36 flex-shrink-0 overflow-hidden rounded-xl border border-outline-variant/20 bg-surface-container">
+                  <div className="relative h-24 w-40 flex-shrink-0 overflow-hidden rounded-xl border border-outline-variant/20 bg-surface-container shadow-xs">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={settings.promoBanner.image || "/hero_3.jpg"}
@@ -1017,7 +1204,7 @@ export default function AdminSettingsPage() {
                       }}
                     />
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 space-y-2">
                     <input
                       type="text"
                       value={settings.promoBanner.image}
@@ -1030,8 +1217,8 @@ export default function AdminSettingsPage() {
                       placeholder="/hero_3.jpg o https://..."
                       className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 font-mono text-xs focus:border-primary focus:outline-none"
                     />
-                    <p className="mt-1 text-[11px] text-tertiary">
-                      Puedes usar imágenes locales como <code className="font-mono">/hero_3.jpg</code> o <code className="font-mono">/assets/photo2.jpg</code>, o enlaces externos de alta resolución.
+                    <p className="text-[11px] text-tertiary">
+                      Puedes subir una imagen desde tu equipo, elegir una de la galería predeterminada, o ingresar un enlace directo.
                     </p>
                   </div>
                 </div>

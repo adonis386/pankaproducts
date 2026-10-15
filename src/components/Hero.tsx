@@ -25,7 +25,12 @@ export default function Hero() {
   const secondaryBtnHref = hero.secondaryBtnHref || "/nosotros";
 
   const activeSlides = useMemo(() => {
-    const list = (hero.slides || []).filter((s) => s.active);
+    const list = (hero.slides || [])
+      .filter((s) => s.active && typeof s.src === "string" && s.src.trim().length > 0)
+      .map((s) => ({
+        ...s,
+        src: s.src.trim() || "/assets/photo2.jpg",
+      }));
     if (list.length > 0) return list;
     return [
       {

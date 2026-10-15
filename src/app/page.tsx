@@ -110,7 +110,7 @@ export default function Home() {
                 </div>
                 <div className="relative min-h-[250px]">
                   <Image
-                    src={settings.promoBanner?.image || "/hero_3.jpg"}
+                    src={settings.promoBanner?.image?.trim() || "/hero_3.jpg"}
                     alt={settings.promoBanner?.title?.[locale] || "Promoción Panka"}
                     fill
                     className="object-cover"
