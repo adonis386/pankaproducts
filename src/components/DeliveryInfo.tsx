@@ -3,35 +3,72 @@
 import { useState } from "react";
 import { HiOutlineTruck, HiOutlineLocationMarker, HiOutlineClock } from "react-icons/hi";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSettings } from "@/context/SettingsContext";
 
 export default function DeliveryInfo() {
-  const { t } = useLanguage();
+  const { locale, t } = useLanguage();
+  const { settings } = useSettings();
   const [active, setActive] = useState("delivery");
+
+  const dInfo = settings.deliveryInfo;
 
   const tabs = [
     {
       id: "delivery",
       label: t("delivery.tabDelivery"),
       icon: HiOutlineTruck,
-      title: t("delivery.deliveryTitle"),
-      description: t("delivery.deliveryDesc"),
-      details: [t("delivery.deliveryD1"), t("delivery.deliveryD2"), t("delivery.deliveryD3")],
+      title:
+        (locale === "es" ? dInfo?.delivery?.title?.es : dInfo?.delivery?.title?.en) ||
+        t("delivery.deliveryTitle"),
+      description:
+        (locale === "es" ? dInfo?.delivery?.description?.es : dInfo?.delivery?.description?.en) ||
+        t("delivery.deliveryDesc"),
+      details: [
+        (locale === "es" ? dInfo?.delivery?.detail1?.es : dInfo?.delivery?.detail1?.en) ||
+          t("delivery.deliveryD1"),
+        (locale === "es" ? dInfo?.delivery?.detail2?.es : dInfo?.delivery?.detail2?.en) ||
+          t("delivery.deliveryD2"),
+        (locale === "es" ? dInfo?.delivery?.detail3?.es : dInfo?.delivery?.detail3?.en) ||
+          t("delivery.deliveryD3"),
+      ],
     },
     {
       id: "pickup",
       label: t("delivery.tabPickup"),
       icon: HiOutlineLocationMarker,
-      title: t("delivery.pickupTitle"),
-      description: t("delivery.pickupDesc"),
-      details: [t("delivery.pickupD1"), t("delivery.pickupD2"), t("delivery.pickupD3")],
+      title:
+        (locale === "es" ? dInfo?.pickup?.title?.es : dInfo?.pickup?.title?.en) ||
+        t("delivery.pickupTitle"),
+      description:
+        (locale === "es" ? dInfo?.pickup?.description?.es : dInfo?.pickup?.description?.en) ||
+        t("delivery.pickupDesc"),
+      details: [
+        (locale === "es" ? dInfo?.pickup?.detail1?.es : dInfo?.pickup?.detail1?.en) ||
+          t("delivery.pickupD1"),
+        (locale === "es" ? dInfo?.pickup?.detail2?.es : dInfo?.pickup?.detail2?.en) ||
+          t("delivery.pickupD2"),
+        (locale === "es" ? dInfo?.pickup?.detail3?.es : dInfo?.pickup?.detail3?.en) ||
+          t("delivery.pickupD3"),
+      ],
     },
     {
       id: "schedule",
       label: t("delivery.tabSchedule"),
       icon: HiOutlineClock,
-      title: t("delivery.scheduleTitle"),
-      description: t("delivery.scheduleDesc"),
-      details: [t("delivery.scheduleD1"), t("delivery.scheduleD2"), t("delivery.scheduleD3")],
+      title:
+        (locale === "es" ? dInfo?.schedule?.title?.es : dInfo?.schedule?.title?.en) ||
+        t("delivery.scheduleTitle"),
+      description:
+        (locale === "es" ? dInfo?.schedule?.description?.es : dInfo?.schedule?.description?.en) ||
+        t("delivery.scheduleDesc"),
+      details: [
+        (locale === "es" ? dInfo?.schedule?.detail1?.es : dInfo?.schedule?.detail1?.en) ||
+          t("delivery.scheduleD1"),
+        (locale === "es" ? dInfo?.schedule?.detail2?.es : dInfo?.schedule?.detail2?.en) ||
+          t("delivery.scheduleD2"),
+        (locale === "es" ? dInfo?.schedule?.detail3?.es : dInfo?.schedule?.detail3?.en) ||
+          t("delivery.scheduleD3"),
+      ],
     },
   ];
 

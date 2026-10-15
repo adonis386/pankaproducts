@@ -28,6 +28,20 @@ export interface PromoBanner {
   image: string;
 }
 
+export interface DeliveryTabContent {
+  title: BilingualText;
+  description: BilingualText;
+  detail1: BilingualText;
+  detail2: BilingualText;
+  detail3: BilingualText;
+}
+
+export interface DeliverySectionSettings {
+  delivery: DeliveryTabContent;
+  pickup: DeliveryTabContent;
+  schedule: DeliveryTabContent;
+}
+
 export interface SiteSettings {
   contact: {
     email: string;
@@ -70,6 +84,7 @@ export interface SiteSettings {
     communityTitle: BilingualText;
     communityDesc: BilingualText;
   };
+  deliveryInfo: DeliverySectionSettings;
   storeStatus: {
     isOpen: boolean;
     noticeEn: string;
@@ -246,6 +261,74 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
     communityDesc: {
       en: "We work with local producers and support the families in our community.",
       es: "Trabajamos con productores locales y apoyamos a las familias de nuestra comunidad.",
+    },
+  },
+  deliveryInfo: {
+    delivery: {
+      title: {
+        en: "Local Delivery",
+        es: "Entrega a Domicilio",
+      },
+      description: {
+        en: "Get your tamales delivered warm to your door. Orders placed before 2pm are delivered the next day.",
+        es: "Recibe tus tamales calientes en la puerta de tu casa. Pedidos antes de las 2pm se entregan al día siguiente.",
+      },
+      detail1: {
+        en: "Exclusive coverage in Miami-Dade & Broward County",
+        es: "Cobertura exclusiva en condados de Miami-Dade y Broward",
+      },
+      detail2: {
+        en: "Free shipping on selected items and eligible orders",
+        es: "Envío gratis en productos seleccionados y compras elegibles",
+      },
+      detail3: {
+        en: "Thermal packaging to keep everything warm and fresh",
+        es: "Empaque térmico para mantener la temperatura y frescura",
+      },
+    },
+    pickup: {
+      title: {
+        en: "Store Pick-Up",
+        es: "Recoger en Tienda",
+      },
+      description: {
+        en: "Pick up your order ready in 30 minutes after placing it at our Miami location.",
+        es: "Recoge tu pedido listo en 30 minutos después de confirmar tu orden en nuestra ubicación en Miami.",
+      },
+      detail1: {
+        en: "Doral, FL — 9851 NW 58th St",
+        es: "Doral, FL — 9851 NW 58th St",
+      },
+      detail2: {
+        en: "Monday to Friday: 8am - 7pm",
+        es: "Lunes a Viernes: 8am - 7pm",
+      },
+      detail3: {
+        en: "Saturday: 9am - 4pm",
+        es: "Sábados: 9am - 4pm",
+      },
+    },
+    schedule: {
+      title: {
+        en: "Scheduled Orders",
+        es: "Pedidos Programados",
+      },
+      description: {
+        en: "Schedule your delivery for the day and time you prefer. Perfect for events and celebrations.",
+        es: "Programa tu entrega para el día y hora que prefieras. Ideal para eventos y celebraciones.",
+      },
+      detail1: {
+        en: "Schedule up to 7 days in advance",
+        es: "Programa con hasta 7 días de anticipación",
+      },
+      detail2: {
+        en: "Bulk orders starting at 50 pieces",
+        es: "Pedidos por mayoreo desde 50 piezas",
+      },
+      detail3: {
+        en: "Catering service and custom event packaging",
+        es: "Servicio de catering y empaque especial para eventos",
+      },
     },
   },
   storeStatus: {

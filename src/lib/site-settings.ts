@@ -12,6 +12,16 @@ export * from "./site-settings-types";
 
 const DOC_ID = "general";
 
+function mergeTab(defaultTab: import("./site-settings-types").DeliveryTabContent, customTab?: Partial<import("./site-settings-types").DeliveryTabContent>) {
+  return {
+    title: { ...defaultTab.title, ...(customTab?.title || {}) },
+    description: { ...defaultTab.description, ...(customTab?.description || {}) },
+    detail1: { ...defaultTab.detail1, ...(customTab?.detail1 || {}) },
+    detail2: { ...defaultTab.detail2, ...(customTab?.detail2 || {}) },
+    detail3: { ...defaultTab.detail3, ...(customTab?.detail3 || {}) },
+  };
+}
+
 export async function getSiteSettings(): Promise<SiteSettings> {
   try {
     const db = adminDb();
@@ -46,6 +56,11 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       story: {
         ...DEFAULT_SITE_SETTINGS.story,
         ...(data.story || {}),
+      },
+      deliveryInfo: {
+        delivery: mergeTab(DEFAULT_SITE_SETTINGS.deliveryInfo.delivery, data.deliveryInfo?.delivery),
+        pickup: mergeTab(DEFAULT_SITE_SETTINGS.deliveryInfo.pickup, data.deliveryInfo?.pickup),
+        schedule: mergeTab(DEFAULT_SITE_SETTINGS.deliveryInfo.schedule, data.deliveryInfo?.schedule),
       },
       storeStatus: {
         ...DEFAULT_SITE_SETTINGS.storeStatus,

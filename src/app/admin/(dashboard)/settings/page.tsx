@@ -6,6 +6,7 @@ import {
   HiOutlineBookOpen,
   HiOutlineCheck,
   HiOutlineClock,
+  HiOutlineLocationMarker,
   HiOutlineMail,
   HiOutlinePhone,
   HiOutlinePhotograph,
@@ -14,6 +15,7 @@ import {
   HiOutlineShieldCheck,
   HiOutlineSpeakerphone,
   HiOutlineTrash,
+  HiOutlineTruck,
   HiOutlineUpload,
   HiOutlineUserAdd,
   HiOutlineUserRemove,
@@ -51,7 +53,7 @@ interface AdminUser {
   lastSignInTime?: string;
 }
 
-type TabKey = "hero_promo" | "story" | "footer" | "announcements" | "admins";
+type TabKey = "hero_promo" | "story" | "delivery" | "footer" | "announcements" | "admins";
 
 export default function AdminSettingsPage() {
   const { user, loading: authLoading } = useAuth();
@@ -103,6 +105,20 @@ export default function AdminSettingsPage() {
             promoBanner: {
               ...DEFAULT_SITE_SETTINGS.promoBanner,
               ...(setData.settings.promoBanner || {}),
+            },
+            deliveryInfo: {
+              delivery: {
+                ...DEFAULT_SITE_SETTINGS.deliveryInfo.delivery,
+                ...(setData.settings.deliveryInfo?.delivery || {}),
+              },
+              pickup: {
+                ...DEFAULT_SITE_SETTINGS.deliveryInfo.pickup,
+                ...(setData.settings.deliveryInfo?.pickup || {}),
+              },
+              schedule: {
+                ...DEFAULT_SITE_SETTINGS.deliveryInfo.schedule,
+                ...(setData.settings.deliveryInfo?.schedule || {}),
+              },
             },
           });
         }
@@ -438,6 +454,18 @@ export default function AdminSettingsPage() {
         >
           <HiOutlineBookOpen className="h-5 w-5" />
           Historia & Marca
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("delivery")}
+          className={`flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition-all ${
+            activeTab === "delivery"
+              ? "bg-surface-container-lowest text-primary shadow-sm"
+              : "text-on-surface/70 hover:text-on-surface"
+          }`}
+        >
+          <HiOutlineTruck className="h-5 w-5" />
+          Envíos & Entregas
         </button>
         <button
           type="button"
@@ -1733,6 +1761,800 @@ export default function AdminSettingsPage() {
                     }
                     className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
                   />
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {/* ─── TAB: ENVÍOS & ENTREGAS (DELIVERY INFO) ─── */}
+      {activeTab === "delivery" && (
+        <div className="space-y-8">
+          <section className="rounded-3xl bg-surface-container-lowest p-6 shadow-sm small:p-8">
+            <div className="mb-6 border-b border-outline-variant/10 pb-4">
+              <span className="text-xs font-bold uppercase tracking-widest text-primary">Logística y Cobertura</span>
+              <h2 className="font-heading text-2xl font-bold text-on-surface">Información de Envíos, Retiro y Programación</h2>
+              <p className="mt-1 text-sm text-tertiary">
+                Edita los textos y detalles de la tarjeta de entrega en el inicio. Aquí puedes definir la cobertura exclusiva para <strong>Miami-Dade y Broward</strong>, condiciones de envío gratis y horarios de pickup.
+              </p>
+            </div>
+
+            {/* Sub-section 1: Local Delivery */}
+            <div className="mb-10 rounded-2xl border border-outline-variant/20 bg-surface-container-low/40 p-6">
+              <div className="mb-4 flex items-center gap-2">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <HiOutlineTruck className="h-5 w-5" />
+                </span>
+                <div>
+                  <h3 className="font-heading text-lg font-bold text-on-surface">1. Pestaña: Entrega a Domicilio (Local Delivery)</h3>
+                  <p className="text-xs text-secondary">Texto visible al seleccionar la primera opción de delivery.</p>
+                </div>
+              </div>
+
+              <div className="space-y-5">
+                {/* Titles */}
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Título de la Pestaña (Español)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.deliveryInfo?.delivery?.title?.es || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            delivery: {
+                              ...s.deliveryInfo.delivery,
+                              title: { ...s.deliveryInfo.delivery.title, es: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-3 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Tab Title (English)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.deliveryInfo?.delivery?.title?.en || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            delivery: {
+                              ...s.deliveryInfo.delivery,
+                              title: { ...s.deliveryInfo.delivery.title, en: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-3 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Descripción (Español)
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={settings.deliveryInfo?.delivery?.description?.es || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            delivery: {
+                              ...s.deliveryInfo.delivery,
+                              description: { ...s.deliveryInfo.delivery.description, es: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Description (English)
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={settings.deliveryInfo?.delivery?.description?.en || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            delivery: {
+                              ...s.deliveryInfo.delivery,
+                              description: { ...s.deliveryInfo.delivery.description, en: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Bullet 1: Cobertura */}
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Punto 1 — Cobertura (Español)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.deliveryInfo?.delivery?.detail1?.es || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            delivery: {
+                              ...s.deliveryInfo.delivery,
+                              detail1: { ...s.deliveryInfo.delivery.detail1, es: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      placeholder="Ej: Cobertura exclusiva en condados de Miami-Dade y Broward"
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Point 1 — Coverage (English)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.deliveryInfo?.delivery?.detail1?.en || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            delivery: {
+                              ...s.deliveryInfo.delivery,
+                              detail1: { ...s.deliveryInfo.delivery.detail1, en: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      placeholder="e.g. Exclusive coverage in Miami-Dade & Broward County"
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Bullet 2: Envío Gratis */}
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Punto 2 — Condición de Envío Gratis (Español)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.deliveryInfo?.delivery?.detail2?.es || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            delivery: {
+                              ...s.deliveryInfo.delivery,
+                              detail2: { ...s.deliveryInfo.delivery.detail2, es: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      placeholder="Ej: Envío gratis en productos seleccionados y compras elegibles"
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Point 2 — Free Shipping Terms (English)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.deliveryInfo?.delivery?.detail2?.en || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            delivery: {
+                              ...s.deliveryInfo.delivery,
+                              detail2: { ...s.deliveryInfo.delivery.detail2, en: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      placeholder="e.g. Free shipping on selected items and eligible orders"
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Bullet 3: Empaque y Conservación */}
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Punto 3 — Empaque y Frescura (Español)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.deliveryInfo?.delivery?.detail3?.es || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            delivery: {
+                              ...s.deliveryInfo.delivery,
+                              detail3: { ...s.deliveryInfo.delivery.detail3, es: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      placeholder="Ej: Empaque térmico para mantener la temperatura y frescura"
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Point 3 — Packaging & Freshness (English)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.deliveryInfo?.delivery?.detail3?.en || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            delivery: {
+                              ...s.deliveryInfo.delivery,
+                              detail3: { ...s.deliveryInfo.delivery.detail3, en: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      placeholder="e.g. Thermal packaging to keep everything warm and fresh"
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Sub-section 2: Store Pick-Up */}
+            <div className="mb-10 rounded-2xl border border-outline-variant/20 bg-surface-container-low/40 p-6">
+              <div className="mb-4 flex items-center gap-2">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <HiOutlineLocationMarker className="h-5 w-5" />
+                </span>
+                <div>
+                  <h3 className="font-heading text-lg font-bold text-on-surface">2. Pestaña: Recoger en Tienda (Store Pick-Up)</h3>
+                  <p className="text-xs text-secondary">Texto visible al seleccionar la opción de retiro en local.</p>
+                </div>
+              </div>
+
+              <div className="space-y-5">
+                {/* Titles */}
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Título (Español)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.deliveryInfo?.pickup?.title?.es || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            pickup: {
+                              ...s.deliveryInfo.pickup,
+                              title: { ...s.deliveryInfo.pickup.title, es: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-3 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Title (English)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.deliveryInfo?.pickup?.title?.en || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            pickup: {
+                              ...s.deliveryInfo.pickup,
+                              title: { ...s.deliveryInfo.pickup.title, en: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-3 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Descripción (Español)
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={settings.deliveryInfo?.pickup?.description?.es || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            pickup: {
+                              ...s.deliveryInfo.pickup,
+                              description: { ...s.deliveryInfo.pickup.description, es: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Description (English)
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={settings.deliveryInfo?.pickup?.description?.en || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            pickup: {
+                              ...s.deliveryInfo.pickup,
+                              description: { ...s.deliveryInfo.pickup.description, en: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Bullets: Address, Week hours, Sat hours */}
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Punto 1 — Dirección de Retiro (Español)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.deliveryInfo?.pickup?.detail1?.es || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            pickup: {
+                              ...s.deliveryInfo.pickup,
+                              detail1: { ...s.deliveryInfo.pickup.detail1, es: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      placeholder="Doral, FL — 9851 NW 58th St"
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Point 1 — Pick-Up Address (English)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.deliveryInfo?.pickup?.detail1?.en || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            pickup: {
+                              ...s.deliveryInfo.pickup,
+                              detail1: { ...s.deliveryInfo.pickup.detail1, en: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      placeholder="Doral, FL — 9851 NW 58th St"
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Punto 2 — Horario Lun-Vie (Español)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.deliveryInfo?.pickup?.detail2?.es || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            pickup: {
+                              ...s.deliveryInfo.pickup,
+                              detail2: { ...s.deliveryInfo.pickup.detail2, es: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      placeholder="Lunes a Viernes: 8am - 7pm"
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Point 2 — Mon-Fri Hours (English)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.deliveryInfo?.pickup?.detail2?.en || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            pickup: {
+                              ...s.deliveryInfo.pickup,
+                              detail2: { ...s.deliveryInfo.pickup.detail2, en: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      placeholder="Monday to Friday: 8am - 7pm"
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Punto 3 — Horario Sábados (Español)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.deliveryInfo?.pickup?.detail3?.es || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            pickup: {
+                              ...s.deliveryInfo.pickup,
+                              detail3: { ...s.deliveryInfo.pickup.detail3, es: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      placeholder="Sábados: 9am - 4pm"
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Point 3 — Saturday Hours (English)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.deliveryInfo?.pickup?.detail3?.en || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            pickup: {
+                              ...s.deliveryInfo.pickup,
+                              detail3: { ...s.deliveryInfo.pickup.detail3, en: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      placeholder="Saturday: 9am - 4pm"
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Sub-section 3: Scheduled Orders */}
+            <div className="rounded-2xl border border-outline-variant/20 bg-surface-container-low/40 p-6">
+              <div className="mb-4 flex items-center gap-2">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <HiOutlineClock className="h-5 w-5" />
+                </span>
+                <div>
+                  <h3 className="font-heading text-lg font-bold text-on-surface">3. Pestaña: Pedidos Programados (Schedule)</h3>
+                  <p className="text-xs text-secondary">Texto visible al seleccionar la opción de pedidos anticipados o eventos.</p>
+                </div>
+              </div>
+
+              <div className="space-y-5">
+                {/* Titles */}
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Título (Español)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.deliveryInfo?.schedule?.title?.es || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            schedule: {
+                              ...s.deliveryInfo.schedule,
+                              title: { ...s.deliveryInfo.schedule.title, es: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-3 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Title (English)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.deliveryInfo?.schedule?.title?.en || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            schedule: {
+                              ...s.deliveryInfo.schedule,
+                              title: { ...s.deliveryInfo.schedule.title, en: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-3 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Descripción (Español)
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={settings.deliveryInfo?.schedule?.description?.es || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            schedule: {
+                              ...s.deliveryInfo.schedule,
+                              description: { ...s.deliveryInfo.schedule.description, es: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Description (English)
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={settings.deliveryInfo?.schedule?.description?.en || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            schedule: {
+                              ...s.deliveryInfo.schedule,
+                              description: { ...s.deliveryInfo.schedule.description, en: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Bullets: Advance days, Bulk pieces, Catering */}
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Punto 1 — Anticipación (Español)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.deliveryInfo?.schedule?.detail1?.es || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            schedule: {
+                              ...s.deliveryInfo.schedule,
+                              detail1: { ...s.deliveryInfo.schedule.detail1, es: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      placeholder="Programa con hasta 7 días de anticipación"
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Point 1 — Advance Notice (English)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.deliveryInfo?.schedule?.detail1?.en || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            schedule: {
+                              ...s.deliveryInfo.schedule,
+                              detail1: { ...s.deliveryInfo.schedule.detail1, en: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      placeholder="Schedule up to 7 days in advance"
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Punto 2 — Volumen o Mayoreo (Español)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.deliveryInfo?.schedule?.detail2?.es || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            schedule: {
+                              ...s.deliveryInfo.schedule,
+                              detail2: { ...s.deliveryInfo.schedule.detail2, es: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      placeholder="Pedidos por mayoreo desde 50 piezas"
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Point 2 — Bulk Minimum (English)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.deliveryInfo?.schedule?.detail2?.en || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            schedule: {
+                              ...s.deliveryInfo.schedule,
+                              detail2: { ...s.deliveryInfo.schedule.detail2, en: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      placeholder="Bulk orders starting at 50 pieces"
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Punto 3 — Catering y Empaque (Español)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.deliveryInfo?.schedule?.detail3?.es || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            schedule: {
+                              ...s.deliveryInfo.schedule,
+                              detail3: { ...s.deliveryInfo.schedule.detail3, es: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      placeholder="Servicio de catering y empaque especial para eventos"
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-secondary">
+                      Point 3 — Catering & Packaging (English)
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.deliveryInfo?.schedule?.detail3?.en || ""}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          deliveryInfo: {
+                            ...s.deliveryInfo,
+                            schedule: {
+                              ...s.deliveryInfo.schedule,
+                              detail3: { ...s.deliveryInfo.schedule.detail3, en: e.target.value },
+                            },
+                          },
+                        }))
+                      }
+                      placeholder="Catering service and custom event packaging"
+                      className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </div>
                 </div>
               </div>
             </div>

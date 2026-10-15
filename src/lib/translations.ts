@@ -110,8 +110,8 @@ const translations = {
     es: "Recibe tus tamales calientes en la puerta de tu casa. Pedidos antes de las 2pm se entregan al día siguiente.",
   },
   "delivery.deliveryD1": {
-    en: "Coverage from Pinecrest to Boca Raton",
-    es: "Cobertura de Pinecrest a Boca Raton",
+    en: "Exclusive coverage in Miami-Dade & Broward County",
+    es: "Cobertura exclusiva en condados de Miami-Dade y Broward",
   },
   "delivery.deliveryD2": {
     en: "Free shipping on orders over $50",
