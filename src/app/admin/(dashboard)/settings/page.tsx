@@ -2921,7 +2921,7 @@ export default function AdminSettingsPage() {
                     </tr>
                   ) : (
                     admins.map((adm) => {
-                      const isSelf = user.uid === adm.uid;
+                      const isSelf = user?.uid === adm.uid;
                       return (
                         <tr key={adm.uid} className="hover:bg-surface-container-low/40">
                           <td className="px-6 py-4">

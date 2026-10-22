@@ -16,7 +16,6 @@ import {
   HiOutlineTruck,
 } from "react-icons/hi";
 import { useAuth } from "@/context/AuthContext";
-import AuthModal from "@/components/AuthModal";
 import { auth } from "@/lib/firebase";
 import type { PublicOrder } from "@/lib/order-types";
 
@@ -29,10 +28,8 @@ type AdminProduct = { name: string; popular?: boolean };
 type TimeRange = "24h" | "7d" | "30d" | "all";
 
 export default function AdminHomePage() {
-  const { user, loading } = useAuth();
-  const [authOpen, setAuthOpen] = useState(false);
-  const [checking, setChecking] = useState(false);
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const { user } = useAuth();
+  const [dataLoading, setDataLoading] = useState(true);
   const [error, setError] = useState("");
   const [productCount, setProductCount] = useState<number | null>(null);
   const [defaultTopSeller, setDefaultTopSeller] = useState<string>("—");
@@ -40,61 +37,53 @@ export default function AdminHomePage() {
   const [timeRange, setTimeRange] = useState<TimeRange>("all");
 
   useEffect(() => {
-    const check = async () => {
-      if (!user) {
-        setIsAdmin(null);
-        return;
-      }
-      setChecking(true);
+    if (!user) return;
+    let isCancelled = false;
+
+    const loadDashboardData = async () => {
+      setDataLoading(true);
       setError("");
       try {
         const token = await getIdTokenOrThrow();
-        const res = await fetch("/admin/api/products", {
+
+        // Load products count and top sellers
+        const prodRes = await fetch("/admin/api/products", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!res.ok) {
-          const data = (await res.json()) as { error?: string };
-          throw new Error(data.error || "Not authorized.");
-        }
-        setIsAdmin(true);
-      } catch (e) {
-        setIsAdmin(false);
-        setError(e instanceof Error ? e.message : "Not authorized.");
-      } finally {
-        setChecking(false);
-      }
-    };
-    void check();
-  }, [user?.uid, user]);
-
-  useEffect(() => {
-    if (!isAdmin || !user) return;
-    (async () => {
-      try {
-        const token = await getIdTokenOrThrow();
-        const res = await fetch("/admin/api/products", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = (await res.json()) as { products?: AdminProduct[] };
-        if (res.ok && Array.isArray(data.products)) {
-          setProductCount(data.products.length);
-          const popular = data.products.find((p) => p.popular);
-          const name = popular?.name || data.products[0]?.name;
-          if (name) setDefaultTopSeller(name);
+        if (prodRes.ok) {
+          const prodData = (await prodRes.json()) as { products?: AdminProduct[] };
+          if (!isCancelled && Array.isArray(prodData.products)) {
+            setProductCount(prodData.products.length);
+            const popular = prodData.products.find((p) => p.popular);
+            const name = popular?.name || prodData.products[0]?.name;
+            if (name) setDefaultTopSeller(name);
+          }
         }
 
+        // Load orders
         const ordersRes = await fetch("/admin/api/orders", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const ordersData = (await ordersRes.json()) as { orders?: PublicOrder[] };
-        if (ordersRes.ok && Array.isArray(ordersData.orders)) {
-          setOrders(ordersData.orders);
+        if (ordersRes.ok) {
+          const ordersData = (await ordersRes.json()) as { orders?: PublicOrder[] };
+          if (!isCancelled && Array.isArray(ordersData.orders)) {
+            setOrders(ordersData.orders);
+          }
         }
-      } catch {
-        /* optional metrics */
+      } catch (e) {
+        if (!isCancelled) {
+          setError(e instanceof Error ? e.message : "Error cargando métricas.");
+        }
+      } finally {
+        if (!isCancelled) setDataLoading(false);
       }
-    })();
-  }, [isAdmin, user?.uid]);
+    };
+
+    void loadDashboardData();
+    return () => {
+      isCancelled = true;
+    };
+  }, [user]);
 
   // Filter orders by time range
   const filteredOrders = useMemo(() => {
@@ -135,56 +124,10 @@ export default function AdminHomePage() {
       .reduce((sum, o) => sum + o.total, 0);
   }, [filteredOrders]);
 
-  if (loading) {
+  if (dataLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-outline-variant border-t-primary" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <>
-        <div className="mx-auto max-w-lg rounded-[2rem] border border-outline-variant/20 bg-surface-container-lowest p-6 shadow-sm small:p-8">
-          <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-tertiary">Admin</p>
-          <h1 className="font-heading text-3xl font-bold tracking-tight text-on-surface">Panel de control</h1>
-          <p className="mt-2 text-sm font-medium text-tertiary">
-            Gestiona tu menú, pedidos y contenidos de Panka.
-          </p>
-          <button
-            type="button"
-            onClick={() => setAuthOpen(true)}
-            className="mt-8 w-full rounded-xl bg-primary py-4 text-sm font-bold text-on-primary transition-all hover:opacity-90"
-          >
-            Iniciar sesión
-          </button>
-          <p className="mt-3 text-center text-xs text-on-surface-variant">Usa el mismo login de la tienda.</p>
-        </div>
-        <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
-      </>
-    );
-  }
-
-  if (checking || isAdmin === null) {
-    return (
-      <div className="flex min-h-[40vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-outline-variant border-t-primary" />
-      </div>
-    );
-  }
-
-  if (!isAdmin) {
-    return (
-      <div className="mx-auto max-w-lg rounded-[2rem] border border-error/20 bg-error-container/30 p-8">
-        <h1 className="font-heading text-2xl font-bold text-on-surface">Sin acceso</h1>
-        <p className="mt-2 text-sm text-on-surface-variant">{error}</p>
-        <Link
-          href="/"
-          className="mt-6 inline-flex rounded-xl bg-surface-container-high px-5 py-3 text-sm font-bold text-on-surface transition-colors hover:bg-surface-variant"
-        >
-          Volver a la tienda
-        </Link>
       </div>
     );
   }
