@@ -10,6 +10,7 @@ import {
   HiOutlineX,
   HiOutlineUser,
   HiOutlineGlobeAlt,
+  HiOutlineLogout,
 } from "react-icons/hi";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
@@ -160,7 +161,25 @@ export default function Navbar() {
                   {link.label}
                 </Link>
               ))}
-              {!user && (
+              {user ? (
+                <div className="mt-2 border-t border-grey-10 pt-2 flex flex-col gap-1">
+                  <Link
+                    href="/cuenta"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-primary transition-colors hover:bg-grey-5"
+                  >
+                    <HiOutlineUser className="h-4 w-4" />
+                    {t("nav.myAccount")}
+                  </Link>
+                  <button
+                    onClick={() => { void logout(); setMobileOpen(false); }}
+                    className="flex items-center gap-2 rounded-xl px-4 py-2 text-xs text-grey-50 transition-colors hover:bg-grey-5 text-left"
+                  >
+                    <HiOutlineLogout className="h-4 w-4" />
+                    {t("nav.signOut")}
+                  </button>
+                </div>
+              ) : (
                 <button
                   onClick={() => { setAuthOpen(true); setMobileOpen(false); }}
                   className="mt-2 rounded-xl bg-panka-brown-500 py-3 text-sm font-bold text-white"
