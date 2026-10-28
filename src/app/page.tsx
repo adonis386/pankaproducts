@@ -3,7 +3,6 @@
 import Hero from "@/components/Hero";
 import ProductCarousel from "@/components/ProductCarousel";
 import DeliveryInfo from "@/components/DeliveryInfo";
-import Newsletter from "@/components/Newsletter";
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 import { useCatalog } from "@/context/CatalogContext";
@@ -158,9 +157,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      <Newsletter />
-
     </>
   );
 }

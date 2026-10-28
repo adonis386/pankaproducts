@@ -147,17 +147,6 @@ const translations = {
     es: "10% de descuento en pedidos programados",
   },
 
-  // ── Newsletter ──
-  "newsletter.tag": { en: "Newsletter", es: "Newsletter" },
-  "newsletter.title": { en: "Get deals & new flavors", es: "Recibe ofertas y novedades" },
-  "newsletter.desc": {
-    en: "Subscribe and receive exclusive promotions, new flavors and discounts straight to your inbox.",
-    es: "Suscríbete y recibe promociones exclusivas, nuevos sabores y descuentos directo en tu correo.",
-  },
-  "newsletter.placeholder": { en: "your@email.com", es: "tu@correo.com" },
-  "newsletter.submit": { en: "Subscribe", es: "Suscribir" },
-  "newsletter.thanks": { en: "Thanks for subscribing!", es: "¡Gracias por suscribirte!" },
-
   // ── Cart Drawer ──
   "cart.title": { en: "Cart", es: "Carrito" },
   "cart.selectionTitle": { en: "Your selection", es: "Tu selección" },
