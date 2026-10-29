@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import type Stripe from "stripe";
 import { stripe, isStripeConfigured } from "@/lib/stripe";
 import { getCatalogAvailability } from "@/lib/catalog-sync";
+import { calculateShipping } from "@/lib/us-shipping";
 
 interface CheckoutItemPayloadV2 {
   productId: string;
@@ -15,6 +17,9 @@ interface CheckoutPayload {
     phone: string;
     address: string;
     city: string;
+    state?: string;
+    county?: string;
+    zip?: string;
     notes?: string;
   };
   firebaseUid?: string;
@@ -81,7 +86,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Cart is empty." }, { status: 400 });
     }
 
-    const lineItems = await Promise.all(
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = await Promise.all(
       items.map(async (item) => {
         if (!item?.productId) throw new Error("Missing productId.");
         const priceId = await getPriceIdForProduct(item.productId);
@@ -91,6 +96,36 @@ export async function POST(request: Request) {
         };
       })
     );
+
+    const { shippingFee, isFreeDelivery, countyResolved } = calculateShipping({
+      state: customer.state || "FL",
+      county: customer.county,
+      zip: customer.zip,
+      city: customer.city,
+    });
+
+    if (!isFreeDelivery && shippingFee > 0) {
+      lineItems.push({
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: "Shipping Rate (Envío Fuera de Miami-Dade / Broward)",
+            description: `${customer.city || ""}, ${customer.state || "US"} (${countyResolved})`,
+          },
+          unit_amount: Math.round(shippingFee * 100),
+        },
+        quantity: 1,
+      });
+    }
+
+    const fullCityAddress = [
+      customer.city,
+      customer.state,
+      customer.zip,
+      customer.state === "FL" ? `(${countyResolved})` : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
 
     const session = await stripe.checkout.sessions.create({
       ui_mode: "embedded",
@@ -103,7 +138,11 @@ export async function POST(request: Request) {
         customer_email: customer.email,
         customer_phone: customer.phone,
         customer_address: customer.address,
-        customer_city: customer.city,
+        customer_city: fullCityAddress || customer.city,
+        customer_state: customer.state || "FL",
+        customer_county: countyResolved,
+        customer_zip: customer.zip || "",
+        shipping_fee: String(shippingFee),
         customer_notes: customer.notes || "",
         firebase_uid: firebaseUid || "",
         source: "panka-web",
@@ -112,7 +151,11 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ clientSecret: session.client_secret, sessionId: session.id });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to create checkout session.";
+    let message = error instanceof Error ? error.message : "Failed to create checkout session.";
+    if (message.toLowerCase().includes("at least $0.50")) {
+      message =
+        "Aviso de Stripe: El monto mínimo permitido por Stripe para cobros con tarjeta en EE. UU. es $0.50 USD. Para probar con envío gratis ($0.00), sube la cantidad a 50 unidades ($0.50) o transfiere el pedido de $0.01 directamente por WhatsApp.";
+    }
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

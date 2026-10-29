@@ -1,7 +1,15 @@
 "use client";
 
-import { createContext, useContext, useReducer, useEffect, ReactNode } from "react";
+import { createContext, useContext, useReducer, useEffect, useState, ReactNode } from "react";
 import { CartItem, Product } from "@/lib/types";
+import { calculateShipping, type FloridaCountyOption } from "@/lib/us-shipping";
+
+export interface ShippingLocation {
+  state: string;
+  county: FloridaCountyOption;
+  zip: string;
+  city: string;
+}
 
 interface CartState {
   items: CartItem[];
@@ -28,6 +36,11 @@ interface CartContextType {
   closeCart: () => void;
   totalItems: number;
   totalPrice: number;
+  shippingLocation: ShippingLocation;
+  setShippingLocation: (update: Partial<ShippingLocation>) => void;
+  shippingFee: number;
+  isFreeShipping: boolean;
+  grandTotal: number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -86,8 +99,16 @@ function cartReducer(state: CartState, action: CartAction): CartState {
   }
 }
 
+const DEFAULT_SHIPPING: ShippingLocation = {
+  state: "FL",
+  county: "Miami-Dade County",
+  zip: "",
+  city: "",
+};
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, { items: [], isOpen: false });
+  const [shippingLocation, setShippingState] = useState<ShippingLocation>(DEFAULT_SHIPPING);
 
   useEffect(() => {
     const saved = localStorage.getItem("panka-cart");
@@ -98,17 +119,52 @@ export function CartProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem("panka-cart");
       }
     }
+
+    const savedShipping = localStorage.getItem("panka-shipping");
+    if (savedShipping) {
+      try {
+        const parsed = JSON.parse(savedShipping) as Partial<ShippingLocation>;
+        setShippingState((prev) => ({
+          ...prev,
+          ...parsed,
+        }));
+      } catch {
+        localStorage.removeItem("panka-shipping");
+      }
+    }
   }, []);
 
   useEffect(() => {
     localStorage.setItem("panka-cart", JSON.stringify(state.items));
   }, [state.items]);
 
+  const setShippingLocation = (update: Partial<ShippingLocation>) => {
+    setShippingState((prev) => {
+      const next = { ...prev, ...update };
+      try {
+        localStorage.setItem("panka-shipping", JSON.stringify(next));
+      } catch {
+        // ignore storage quota errors
+      }
+      return next;
+    });
+  };
+
   const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = state.items.reduce(
     (sum, item) => sum + item.product.price * item.quantity,
     0
   );
+
+  const { shippingFee, isFreeDelivery } = calculateShipping({
+    state: shippingLocation.state,
+    county: shippingLocation.county,
+    zip: shippingLocation.zip,
+    city: shippingLocation.city,
+  });
+
+  const actualShippingFee = state.items.length > 0 ? shippingFee : 0;
+  const grandTotal = totalPrice + actualShippingFee;
 
   const value: CartContextType = {
     items: state.items,
@@ -122,6 +178,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     closeCart: () => dispatch({ type: "CLOSE_CART" }),
     totalItems,
     totalPrice,
+    shippingLocation,
+    setShippingLocation,
+    shippingFee: actualShippingFee,
+    isFreeShipping: isFreeDelivery,
+    grandTotal,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

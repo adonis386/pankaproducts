@@ -38,5 +38,8 @@ export interface CustomerInfo {
   phone: string;
   address: string;
   city: string;
+  state?: string;
+  county?: string;
+  zip?: string;
   notes?: string;
 }
