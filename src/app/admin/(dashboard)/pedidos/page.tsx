@@ -17,9 +17,43 @@ import {
   HiOutlineTruck,
   HiOutlineX,
 } from "react-icons/hi";
+import { FaWhatsapp } from "react-icons/fa";
 import { auth } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 import type { KitchenStatus, PublicOrder } from "@/lib/order-types";
+
+function getCustomerWhatsAppUrl(order: PublicOrder): string | null {
+  const rawPhone = (order.customer.phone || "").replace(/\D/g, "");
+  if (!rawPhone) return null;
+  const formattedPhone = rawPhone.length === 10 ? `1${rawPhone}` : rawPhone;
+  const itemsSummary = order.items.map((i) => `• ${i.quantity}x ${i.name}`).join("\n");
+  const statusMessages: Record<KitchenStatus, string> = {
+    pending: "Hemos recibido tu pedido y está confirmado en cocina.",
+    confirmed: "¡Hemos recibido tu pago! Tu pedido ya está confirmado en cocina.",
+    preparing: "Tu pedido de Panka ya se está preparando con todo el sabor artesanal 🫔🔥.",
+    delivered: "¡Tu pedido de Panka ha sido entregado! Gracias por tu compra 🫔✨.",
+    cancelled: "Te contactamos respecto a tu pedido en Panka.",
+    failed: "Te contactamos respecto a tu pedido en Panka.",
+  };
+
+  const lines = [
+    `Hola ${order.customer.name || ""}! 👋 Te escribimos de *Panka* 🫔`,
+    "",
+    statusMessages[order.status] || "Te escribimos sobre tu pedido en Panka.",
+    "",
+    `🧾 *Orden:* #${order.id.slice(0, 12).toUpperCase()}`,
+    `🫔 *Detalle:*`,
+    itemsSummary,
+    `💵 *Total Pagado:* $${order.total.toFixed(2)} ${order.currency.toUpperCase()}`,
+    order.customer.address
+      ? `📍 *Dirección:* ${order.customer.address}${order.customer.city ? `, ${order.customer.city}` : ""}`
+      : "",
+    "",
+    "Cualquier duda estamos a tu disposición por aquí.",
+  ].filter(Boolean);
+
+  return `https://wa.me/${formattedPhone}?text=${encodeURIComponent(lines.join("\n"))}`;
+}
 
 async function getIdTokenOrThrow() {
   if (!auth?.currentUser) throw new Error("No authenticated user.");
@@ -125,6 +159,15 @@ export default function AdminPedidosPage() {
 
   useEffect(() => {
     if (user) void load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.uid]);
+
+  useEffect(() => {
+    const handleNewOrderEvent = () => {
+      if (user) void load();
+    };
+    window.addEventListener("panka:new-order", handleNewOrderEvent);
+    return () => window.removeEventListener("panka:new-order", handleNewOrderEvent);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.uid]);
 
@@ -520,6 +563,17 @@ export default function AdminPedidosPage() {
 
                       <td className="px-6 py-5 align-top text-center">
                         <div className="flex items-center justify-center gap-2">
+                          {getCustomerWhatsAppUrl(order) && (
+                            <a
+                              href={getCustomerWhatsAppUrl(order)!}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="rounded-xl bg-[#25D366]/15 p-2.5 text-[#128C7E] transition-colors hover:bg-[#25D366]/25"
+                              title="Escribir por WhatsApp al cliente"
+                            >
+                              <FaWhatsapp className="h-4 w-4" />
+                            </a>
+                          )}
                           <button
                             type="button"
                             onClick={() => setSelectedOrder(order)}
@@ -604,6 +658,17 @@ export default function AdminPedidosPage() {
                     </option>
                   ))}
                 </select>
+                {getCustomerWhatsAppUrl(order) && (
+                  <a
+                    href={getCustomerWhatsAppUrl(order)!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-xl bg-[#25D366] px-3 py-2 text-xs font-bold text-white"
+                    title="WhatsApp al cliente"
+                  >
+                    <FaWhatsapp className="h-4 w-4" />
+                  </a>
+                )}
                 <button
                   type="button"
                   onClick={() => setSelectedOrder(order)}
@@ -716,6 +781,17 @@ export default function AdminPedidosPage() {
 
             {/* Modal Actions */}
             <div className="flex flex-wrap gap-3 pt-4 border-t border-outline-variant/20">
+              {getCustomerWhatsAppUrl(selectedOrder) && (
+                <a
+                  href={getCustomerWhatsAppUrl(selectedOrder)!}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-5 py-3 text-sm font-bold text-white shadow-md hover:bg-[#1ebe5d]"
+                >
+                  <FaWhatsapp className="h-5 w-5" />
+                  WhatsApp al Cliente
+                </a>
+              )}
               <button
                 type="button"
                 onClick={() => handlePrintTicket(selectedOrder)}
