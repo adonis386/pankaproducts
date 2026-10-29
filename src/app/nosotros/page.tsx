@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import { useSettings } from "@/context/SettingsContext";
+import { sanitizeRichTextSafe } from "@/lib/security";
 
 const FANNY_SRC = "/assets/20-678x1024.jpg";
 const STORY_HERO_SRC = "/assets/photo3.jpg";
@@ -80,7 +81,7 @@ export default function NosotrosPage() {
               <div className="mt-8 space-y-5 text-base leading-relaxed text-on-surface-variant md:text-lg">
                 <p>{p1}</p>
                 <p>{p2}</p>
-                <p dangerouslySetInnerHTML={{ __html: p3 }} />
+                <p dangerouslySetInnerHTML={{ __html: sanitizeRichTextSafe(p3) }} />
               </div>
             </div>
           </div>

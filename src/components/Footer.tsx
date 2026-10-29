@@ -11,14 +11,14 @@ export default function Footer() {
 
   const email = settings.contact.email || "hello@pankatamales.com";
   const phone = settings.contact.phone || "+1 (954) 901-4340";
+  const address = settings.contact.address || "8051 West 24 Ave. Suite 17, Hialeah, FL 33016";
+  const hours = settings.contact.hours || "Mon-Fri: 8:00 AM - 4:00 PM";
   const rawWa = settings.contact.whatsapp || "19549014340";
   const waClean = rawWa.replace(/[^0-9]/g, "");
   const phoneClean = phone.replace(/[^0-9+]/g, "");
   const footerDesc = settings.contact.footerDesc?.[locale] || t("footer.desc");
   const waMessage = encodeURIComponent(
-    locale === "es"
-      ? "¡Hola Panka! Me gustaría hacer un pedido de tamales por WhatsApp."
-      : "Hello Panka! I would like to place a tamales order via WhatsApp."
+    "Hello Panka! I would like to place a tamales order via WhatsApp."
   );
 
   const sections = [
@@ -45,6 +45,14 @@ export default function Footer() {
         { href: `mailto:${email}`, label: email },
         { href: `tel:${phoneClean}`, label: phone },
         { href: `https://wa.me/${waClean}?text=${waMessage}`, label: `WhatsApp: ${phone}` },
+        {
+          href: "https://maps.google.com/?q=8051+W+24th+Ave+Suite+17+Hialeah+FL+33016",
+          label: `Pickup: ${address}`,
+        },
+        {
+          href: "/checkout",
+          label: locale === "es" ? "Recogida: Lun–Vie 8am – 4pm" : `Pickup: ${hours}`,
+        },
       ],
     },
   ];

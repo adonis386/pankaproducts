@@ -3,6 +3,13 @@ import type Stripe from "stripe";
 import { stripe, isStripeConfigured } from "@/lib/stripe";
 import { getCatalogAvailability } from "@/lib/catalog-sync";
 import { calculateShipping } from "@/lib/us-shipping";
+import {
+  checkRateLimit,
+  verifySameOrigin,
+  sanitizePlainText,
+  sanitizeEmail,
+  sanitizePhone,
+} from "@/lib/security";
 
 interface CheckoutItemPayloadV2 {
   productId: string;
@@ -27,8 +34,12 @@ interface CheckoutPayload {
 
 async function getPriceIdForProduct(productId: string) {
   if (!stripe) throw new Error("Stripe not configured.");
+  const cleanId = sanitizePlainText(productId, 64);
+  if (!cleanId || !/^[A-Za-z0-9_-]+$/.test(cleanId)) {
+    throw new Error("Invalid product identifier.");
+  }
 
-  const replica = await getCatalogAvailability(productId).catch(() => null);
+  const replica = await getCatalogAvailability(cleanId).catch(() => null);
   if (replica) {
     if (!replica.active || !replica.isAvailable) {
       throw new Error("Product is unavailable.");
@@ -41,7 +52,7 @@ async function getPriceIdForProduct(productId: string) {
     }
   }
 
-  const product = await stripe.products.retrieve(productId);
+  const product = await stripe.products.retrieve(cleanId);
   if (typeof product === "string" || !product) throw new Error("Invalid product.");
 
   if (!product.active) throw new Error("Product is inactive.");
@@ -71,19 +82,56 @@ function clampQuantity(qty: number) {
 }
 
 export async function POST(request: Request) {
+  const originError = verifySameOrigin(request);
+  if (originError) return originError;
+
+  const rate = checkRateLimit(request, "checkout");
+  if (!rate.allowed && rate.response) return rate.response;
+
   try {
     if (!isStripeConfigured || !stripe) {
       return NextResponse.json(
         { error: "Stripe is not configured. Add STRIPE_SECRET_KEY." },
-        { status: 500 }
+        { status: 500, headers: rate.headers }
       );
     }
 
     const body = (await request.json()) as CheckoutPayload;
-    const { items, customer, firebaseUid } = body;
+    const { items, customer, firebaseUid } = body || {};
 
-    if (!Array.isArray(items) || items.length === 0) {
-      return NextResponse.json({ error: "Cart is empty." }, { status: 400 });
+    if (!Array.isArray(items) || items.length === 0 || items.length > 30) {
+      return NextResponse.json(
+        { error: "Invalid cart items." },
+        { status: 400, headers: rate.headers }
+      );
+    }
+
+    if (!customer || typeof customer !== "object") {
+      return NextResponse.json(
+        { error: "Missing customer details." },
+        { status: 400, headers: rate.headers }
+      );
+    }
+
+    // Sanitize all user-supplied fields against XSS & injection
+    const safeCustomer = {
+      name: sanitizePlainText(customer.name, 120),
+      email: sanitizeEmail(customer.email),
+      phone: sanitizePhone(customer.phone),
+      address: sanitizePlainText(customer.address, 220),
+      city: sanitizePlainText(customer.city, 100),
+      state: sanitizePlainText(customer.state || "FL", 10).toUpperCase(),
+      county: sanitizePlainText(customer.county || "", 80),
+      zip: sanitizePlainText(customer.zip || "", 16).replace(/[^0-9-]/g, ""),
+      notes: sanitizePlainText(customer.notes || "", 400),
+    };
+    const safeUid = sanitizePlainText(firebaseUid || "", 128);
+
+    if (!safeCustomer.name || !safeCustomer.email || !safeCustomer.address) {
+      return NextResponse.json(
+        { error: "Please provide valid name, email, and delivery address." },
+        { status: 400, headers: rate.headers }
+      );
     }
 
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = await Promise.all(
@@ -98,10 +146,10 @@ export async function POST(request: Request) {
     );
 
     const { shippingFee, isFreeDelivery, countyResolved } = calculateShipping({
-      state: customer.state || "FL",
-      county: customer.county,
-      zip: customer.zip,
-      city: customer.city,
+      state: safeCustomer.state || "FL",
+      county: safeCustomer.county,
+      zip: safeCustomer.zip,
+      city: safeCustomer.city,
     });
 
     if (!isFreeDelivery && shippingFee > 0) {
@@ -110,7 +158,7 @@ export async function POST(request: Request) {
           currency: "usd",
           product_data: {
             name: "Shipping Rate (Envío Fuera de Miami-Dade / Broward)",
-            description: `${customer.city || ""}, ${customer.state || "US"} (${countyResolved})`,
+            description: `${safeCustomer.city || ""}, ${safeCustomer.state || "US"} (${countyResolved})`,
           },
           unit_amount: Math.round(shippingFee * 100),
         },
@@ -119,10 +167,10 @@ export async function POST(request: Request) {
     }
 
     const fullCityAddress = [
-      customer.city,
-      customer.state,
-      customer.zip,
-      customer.state === "FL" ? `(${countyResolved})` : "",
+      safeCustomer.city,
+      safeCustomer.state,
+      safeCustomer.zip,
+      safeCustomer.state === "FL" ? `(${countyResolved})` : "",
     ]
       .filter(Boolean)
       .join(" ");
@@ -131,31 +179,34 @@ export async function POST(request: Request) {
       ui_mode: "embedded",
       mode: "payment",
       line_items: lineItems,
-      customer_email: customer.email || undefined,
+      customer_email: safeCustomer.email || undefined,
       return_url: `${new URL(request.url).origin}/pedido-exitoso?session_id={CHECKOUT_SESSION_ID}`,
       metadata: {
-        customer_name: customer.name,
-        customer_email: customer.email,
-        customer_phone: customer.phone,
-        customer_address: customer.address,
-        customer_city: fullCityAddress || customer.city,
-        customer_state: customer.state || "FL",
+        customer_name: safeCustomer.name,
+        customer_email: safeCustomer.email,
+        customer_phone: safeCustomer.phone,
+        customer_address: safeCustomer.address,
+        customer_city: fullCityAddress || safeCustomer.city,
+        customer_state: safeCustomer.state || "FL",
         customer_county: countyResolved,
-        customer_zip: customer.zip || "",
+        customer_zip: safeCustomer.zip || "",
         shipping_fee: String(shippingFee),
-        customer_notes: customer.notes || "",
-        firebase_uid: firebaseUid || "",
+        customer_notes: safeCustomer.notes || "",
+        firebase_uid: safeUid,
         source: "panka-web",
       },
     });
 
-    return NextResponse.json({ clientSecret: session.client_secret, sessionId: session.id });
+    return NextResponse.json(
+      { clientSecret: session.client_secret, sessionId: session.id },
+      { headers: rate.headers }
+    );
   } catch (error) {
     let message = error instanceof Error ? error.message : "Failed to create checkout session.";
     if (message.toLowerCase().includes("at least $0.50")) {
       message =
-        "Aviso de Stripe: El monto mínimo permitido por Stripe para cobros con tarjeta en EE. UU. es $0.50 USD. Para probar con envío gratis ($0.00), sube la cantidad a 50 unidades ($0.50) o transfiere el pedido de $0.01 directamente por WhatsApp.";
+        "Aviso de Stripe: El monto mínimo permitido por Stripe para cobros con tarjeta en EE. UU. es $0.50 USD.";
     }
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: message }, { status: 500, headers: rate.headers });
   }
 }

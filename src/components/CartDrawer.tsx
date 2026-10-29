@@ -312,6 +312,21 @@ export default function CartDrawer() {
                       </div>
                     )}
                   </div>
+
+                  {/* Store Pickup Option Info */}
+                  <div className="mt-2.5 flex items-center justify-between gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-3 py-2 text-[11px] text-emerald-900">
+                    <div>
+                      <span className="font-bold">
+                        {locale === "es" ? "📍 Pickup en Local (Gratis):" : "📍 Store Pickup (Free):"}
+                      </span>{" "}
+                      8051 West 24 Ave. Suite 17, Hialeah, FL 33016
+                      <span className="block text-[10px] text-emerald-800/80">
+                        {locale === "es"
+                          ? "Horario de recogida: Lunes a Viernes de 8:00 AM a 4:00 PM"
+                          : "Pickup hours: Monday to Friday, 8:00 AM – 4:00 PM"}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
                 {suggestions.length > 0 && (

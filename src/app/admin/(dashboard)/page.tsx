@@ -35,6 +35,7 @@ export default function AdminHomePage() {
   const [defaultTopSeller, setDefaultTopSeller] = useState<string>("—");
   const [orders, setOrders] = useState<PublicOrder[]>([]);
   const [timeRange, setTimeRange] = useState<TimeRange>("all");
+  const [showGuideSteps, setShowGuideSteps] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -205,6 +206,102 @@ export default function AdminHomePage() {
           </Link>
         </div>
       </header>
+
+      {/* AI Voice Note & Admin Onboarding Guide Card */}
+      <section className="mb-10 overflow-hidden rounded-[2rem] border border-primary/20 bg-gradient-to-br from-surface-container-lowest via-surface-container-lowest to-secondary-container/25 p-6 shadow-sm small:p-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-2xl">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-primary">
+              🎙️ Nota de Voz con IA · Capacitación Admin
+            </span>
+            <h2 className="mt-2 font-heading text-2xl font-bold text-on-surface small:text-3xl">
+              Guía en Audio: Cómo funciona la Web y tu Panel Admin
+            </h2>
+            <p className="mt-1.5 text-sm leading-relaxed text-tertiary">
+              Escucha este resumen narrado con Inteligencia Artificial (2 min) donde te explicamos el flujo de compras, envíos ($0 Miami-Dade/Broward y Pickup en Hialeah vs $25 EE. UU.), alertas de cocina en vivo, WhatsApp al cliente y gestión de productos.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3 min-w-[280px] sm:min-w-[360px]">
+            <div className="rounded-2xl border border-outline-variant/25 bg-surface p-3 shadow-inner">
+              <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-secondary">
+                Reproducir Nota de Voz IA (Español)
+              </p>
+              <audio
+                controls
+                preload="metadata"
+                src="/audio/guia-admin-panka.mp3"
+                className="h-10 w-full"
+              >
+                Tu navegador no soporta reproducción de audio.
+              </audio>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <a
+                href="/audio/guia-admin-panka.mp3"
+                download="Nota-de-Voz-Admin-Panka.mp3"
+                className="flex-1 rounded-xl bg-primary px-3.5 py-2 text-center text-xs font-bold text-on-primary transition-opacity hover:opacity-90"
+              >
+                ⬇ Descargar Audio (.mp3)
+              </a>
+              <a
+                href="/docs/MANUAL_ADMIN_PANKA_NOTEBOOKLM.md"
+                download="MANUAL_ADMIN_PANKA_NOTEBOOKLM.md"
+                className="flex-1 rounded-xl border border-outline-variant/30 bg-surface-container-lowest px-3.5 py-2 text-center text-xs font-bold text-on-surface hover:bg-surface-container"
+              >
+                📄 Fuente NotebookLM (.md)
+              </a>
+              <button
+                type="button"
+                onClick={() => setShowGuideSteps((v) => !v)}
+                className="rounded-xl bg-secondary/15 px-3.5 py-2 text-xs font-bold text-secondary hover:bg-secondary/25"
+              >
+                {showGuideSteps ? "Ocultar guía escrita" : "Ver guía escrita"}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {showGuideSteps && (
+          <div className="mt-6 grid grid-cols-1 gap-4 border-t border-outline-variant/20 pt-6 md:grid-cols-2 lg:grid-cols-4 text-xs">
+            <div className="rounded-2xl bg-surface p-4 border border-outline-variant/15">
+              <p className="font-bold text-primary uppercase tracking-wider mb-1">
+                1. Envíos y Pickup Hialeah
+              </p>
+              <p className="text-tertiary leading-relaxed">
+                <strong>Miami-Dade y Broward:</strong> Delivery Gratis ($0.00).<br />
+                <strong>Pickup Local ($0.00):</strong> 8051 West 24 Ave. Suite 17, Hialeah, FL 33016 (Lun–Vie 8:00 AM – 4:00 PM).<br />
+                <strong>Resto de FL y EE. UU.:</strong> $25.00 USD automático por ZIP/Estado.
+              </p>
+            </div>
+            <div className="rounded-2xl bg-surface p-4 border border-outline-variant/15">
+              <p className="font-bold text-primary uppercase tracking-wider mb-1">
+                2. Campana y Alertas en Vivo
+              </p>
+              <p className="text-tertiary leading-relaxed">
+                Activa el botón <strong>&ldquo;Activar Notificaciones&rdquo;</strong> en la barra lateral izquierda. Cuando entre un pago en Stripe, sonará la campana de cocina, verás una alerta en pantalla y la tabla se actualizará sola.
+              </p>
+            </div>
+            <div className="rounded-2xl bg-surface p-4 border border-outline-variant/15">
+              <p className="font-bold text-primary uppercase tracking-wider mb-1">
+                3. Pedidos, Comanda y WhatsApp
+              </p>
+              <p className="text-tertiary leading-relaxed">
+                En <strong>Orders (/admin/pedidos)</strong> puedes cambiar el estado (<em>confirmed</em>, <em>preparing</em>, <em>delivered</em>), imprimir el ticket térmico de 80mm y tocar el botón verde de <strong>WhatsApp</strong> para escribirle al cliente en inglés con 1 clic.
+              </p>
+            </div>
+            <div className="rounded-2xl bg-surface p-4 border border-outline-variant/15">
+              <p className="font-bold text-primary uppercase tracking-wider mb-1">
+                4. Menú, CMS y NotebookLM
+              </p>
+              <p className="text-tertiary leading-relaxed">
+                En <strong>Menu Management</strong> editas precios, fotos y stock en vivo. En <strong>Settings</strong> editas textos, horarios y administradores. Si deseas un podcast conversacional en <a href="https://notebooklm.google.com" target="_blank" rel="noopener noreferrer" className="font-bold text-primary underline">Google NotebookLM</a>, sube el archivo <code>.md</code> descargable arriba.
+              </p>
+            </div>
+          </div>
+        )}
+      </section>
 
       {/* Metric Cards */}
       <section className="mb-12 grid grid-cols-1 gap-6 md:grid-cols-3">

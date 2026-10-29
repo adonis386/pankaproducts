@@ -240,63 +240,34 @@ export default function CheckoutPage() {
   const isFlorida = shippingLocation.state === "FL";
 
   const whatsappCheckoutMessage =
-    locale === "es"
-      ? `¡Hola Panka! Quisiera confirmar el siguiente pedido:\n\n` +
-        `👤 *DATOS DEL CLIENTE:*\n` +
-        `• Nombre: ${form.name || "—"}\n` +
-        `• Teléfono: ${form.phone || "—"}\n` +
-        `• Email: ${form.email || "—"}\n` +
-        `• Dirección: ${form.address || "—"}\n` +
-        `• Ciudad: ${form.city || "—"}\n` +
-        `• Estado: ${selectedStateObj.name} (${selectedStateObj.code})\n` +
-        (isFlorida ? `• Condado: ${shippingLocation.county}\n` : "") +
-        `• ZIP Code: ${form.zip || "—"}\n` +
-        (form.notes ? `• Notas: ${form.notes}\n` : "") +
-        `\n📦 *PRODUCTOS:*\n` +
-        items
-          .map(
-            (i) =>
-              `• ${i.quantity}x ${i.product.name} — $${(
-                i.product.price * i.quantity
-              ).toFixed(2)}`
-          )
-          .join("\n") +
-        `\n\n💳 *RESUMEN DE PAGO:*\n` +
-        `• Subtotal: $${totalPrice.toFixed(2)}\n` +
-        `• Envío (Shipping Rate): ${
-          isFreeShipping
-            ? "GRATIS ($0.00 — Miami-Dade / Broward)"
-            : `$${shippingFee.toFixed(2)}`
-        }\n` +
-        `• *TOTAL FINAL: $${grandTotal.toFixed(2)}*`
-      : `Hello Panka! I would like to confirm the following order:\n\n` +
-        `👤 *CUSTOMER DETAILS:*\n` +
-        `• Name: ${form.name || "—"}\n` +
-        `• Phone: ${form.phone || "—"}\n` +
-        `• Email: ${form.email || "—"}\n` +
-        `• Address: ${form.address || "—"}\n` +
-        `• City: ${form.city || "—"}\n` +
-        `• State: ${selectedStateObj.name} (${selectedStateObj.code})\n` +
-        (isFlorida ? `• County: ${shippingLocation.county}\n` : "") +
-        `• ZIP Code: ${form.zip || "—"}\n` +
-        (form.notes ? `• Notes: ${form.notes}\n` : "") +
-        `\n📦 *ITEMS:*\n` +
-        items
-          .map(
-            (i) =>
-              `• ${i.quantity}x ${i.product.name} — $${(
-                i.product.price * i.quantity
-              ).toFixed(2)}`
-          )
-          .join("\n") +
-        `\n\n💳 *PAYMENT SUMMARY:*\n` +
-        `• Subtotal: $${totalPrice.toFixed(2)}\n` +
-        `• Shipping Rate: ${
-          isFreeShipping
-            ? "FREE ($0.00 — Miami-Dade / Broward)"
-            : `$${shippingFee.toFixed(2)}`
-        }\n` +
-        `• *GRAND TOTAL: $${grandTotal.toFixed(2)}*`;
+    `Hello Panka! I would like to confirm the following order:\n\n` +
+    `👤 *CUSTOMER DETAILS:*\n` +
+    `• Name: ${form.name || "—"}\n` +
+    `• Phone: ${form.phone || "—"}\n` +
+    `• Email: ${form.email || "—"}\n` +
+    `• Address: ${form.address || "—"}\n` +
+    `• City: ${form.city || "—"}\n` +
+    `• State: ${selectedStateObj.name} (${selectedStateObj.code})\n` +
+    (isFlorida ? `• County: ${shippingLocation.county}\n` : "") +
+    `• ZIP Code: ${form.zip || "—"}\n` +
+    (form.notes ? `• Notes: ${form.notes}\n` : "") +
+    `\n📦 *ITEMS:*\n` +
+    items
+      .map(
+        (i) =>
+          `• ${i.quantity}x ${i.product.name} — $${(
+            i.product.price * i.quantity
+          ).toFixed(2)}`
+      )
+      .join("\n") +
+    `\n\n💳 *PAYMENT SUMMARY:*\n` +
+    `• Subtotal: $${totalPrice.toFixed(2)}\n` +
+    `• Shipping Rate: ${
+      isFreeShipping
+        ? "FREE ($0.00 — Miami-Dade / Broward)"
+        : `$${shippingFee.toFixed(2)}`
+    }\n` +
+    `• *GRAND TOTAL: $${grandTotal.toFixed(2)}*`;
 
   const inputClass =
     "w-full rounded-xl border-0 bg-surface-container-highest px-4 py-3.5 text-base text-on-surface outline-none transition-all placeholder:text-tertiary/60 focus:ring-2 focus:ring-primary/15";
@@ -367,6 +338,45 @@ export default function CheckoutPage() {
                       ? "Shipping Rate: $25.00"
                       : "Shipping Rate: $25.00"}
                   </span>
+                </div>
+
+                {/* Store Pickup Option Banner */}
+                <div className="mb-6 flex flex-col justify-between gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/5 p-4 xsmall:flex-row xsmall:items-center">
+                  <div className="text-xs text-emerald-950">
+                    <p className="font-bold">
+                      {locale === "es"
+                        ? "📍 ¿Prefieres recoger en nuestro local (Pickup Gratis)?"
+                        : "📍 Prefer Store Pickup at our location (Free)?"}
+                    </p>
+                    <p className="mt-0.5 text-emerald-900">
+                      8051 West 24 Ave. Suite 17, Hialeah, FL 33016
+                    </p>
+                    <p className="text-[11px] text-emerald-800/80">
+                      {locale === "es"
+                        ? "Horario de recogida: Lunes a Viernes de 8:00 AM a 4:00 PM"
+                        : "Pickup hours: Monday to Friday, 8:00 AM – 4:00 PM"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForm((prev) => ({
+                        ...prev,
+                        address: "PICKUP EN LOCAL: 8051 West 24 Ave. Suite 17",
+                        city: "Hialeah",
+                        zip: "33016",
+                      }));
+                      setShippingLocation({
+                        state: "FL",
+                        county: "Miami-Dade County",
+                        city: "Hialeah",
+                        zip: "33016",
+                      });
+                    }}
+                    className="shrink-0 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-emerald-700"
+                  >
+                    {locale === "es" ? "Seleccionar Pickup ($0.00)" : "Select Store Pickup ($0.00)"}
+                  </button>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 xsmall:grid-cols-2">

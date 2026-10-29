@@ -97,8 +97,8 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
     email: "hello@pankatamales.com",
     phone: "+1 (954) 901-4340",
     whatsapp: "19549014340",
-    address: "Doral, FL — 9851 NW 58th St",
-    hours: "Mon-Fri: 8am - 7pm · Sat: 9am - 4pm",
+    address: "8051 West 24 Ave. Suite 17, Hialeah, FL 33016",
+    hours: "Mon-Fri: 8:00 AM - 4:00 PM",
     footerDesc: {
       en: "Small-batch artisan tamales made with freshly nixtamalized corn masa. Handcrafted recipes steamed fresh and delivered to your door in Miami.",
       es: "Tamales artesanales en lotes pequeños, preparados con masa nixtamalizada fresca. Recetas hechas a mano, cocidas al vapor y entregadas en Miami.",
@@ -289,23 +289,23 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
     pickup: {
       title: {
         en: "Store Pick-Up",
-        es: "Recoger en Tienda",
+        es: "Recoger en Local (Pickup)",
       },
       description: {
-        en: "Pick up your order ready in 30 minutes after placing it at our Miami location.",
-        es: "Recoge tu pedido listo en 30 minutos después de confirmar tu orden en nuestra ubicación en Miami.",
+        en: "Pick up your order directly at our Hialeah location from Monday to Friday.",
+        es: "Recoge tu pedido directamente en nuestro local de Hialeah de lunes a viernes.",
       },
       detail1: {
-        en: "Doral, FL — 9851 NW 58th St",
-        es: "Doral, FL — 9851 NW 58th St",
+        en: "8051 West 24 Ave. Suite 17, Hialeah, FL 33016",
+        es: "8051 West 24 Ave. Suite 17, Hialeah, FL 33016",
       },
       detail2: {
-        en: "Monday to Friday: 8am - 7pm",
-        es: "Lunes a Viernes: 8am - 7pm",
+        en: "Monday to Friday: 8:00 AM – 4:00 PM",
+        es: "Lunes a Viernes: 8:00 AM – 4:00 PM",
       },
       detail3: {
-        en: "Saturday: 9am - 4pm",
-        es: "Sábados: 9am - 4pm",
+        en: "Free local pick-up — coordinate via WhatsApp upon arrival",
+        es: "Recogida gratuita en local — coordina por WhatsApp al llegar",
       },
     },
     schedule: {

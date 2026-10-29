@@ -126,9 +126,9 @@ const translations = {
     en: "Pick up your order ready in 30 minutes after placing it at our Miami location.",
     es: "Recoge tu pedido listo en 30 minutos después de confirmar tu orden en nuestra ubicación en Miami.",
   },
-  "delivery.pickupD1": { en: "Doral, FL — 9851 NW 58th St", es: "Doral, FL — 9851 NW 58th St" },
-  "delivery.pickupD2": { en: "Monday to Friday: 8am - 7pm", es: "Lunes a Viernes: 8am - 7pm" },
-  "delivery.pickupD3": { en: "Saturday: 9am - 4pm", es: "Sábados: 9am - 4pm" },
+  "delivery.pickupD1": { en: "8051 West 24 Ave. Suite 17, Hialeah, FL 33016", es: "8051 West 24 Ave. Suite 17, Hialeah, FL 33016" },
+  "delivery.pickupD2": { en: "Monday to Friday: 8:00 AM – 4:00 PM", es: "Lunes a Viernes: 8:00 AM – 4:00 PM" },
+  "delivery.pickupD3": { en: "Free local pick-up — coordinate via WhatsApp upon arrival", es: "Recogida gratuita en local — coordina por WhatsApp al llegar" },
   "delivery.scheduleTitle": { en: "Scheduled Orders", es: "Pedidos Programados" },
   "delivery.scheduleDesc": {
     en: "Schedule your delivery for the day and time you prefer. Perfect for events and celebrations.",
