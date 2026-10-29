@@ -165,30 +165,19 @@ export default function PedidoExitosoClient() {
       .join("\n");
 
     const text =
-      locale === "es"
-        ? `✅ *PEDIDO PAGADO EN WEB — PANKA PRODUCTS*\n\n` +
-          `🧾 *Orden:* #${shortId}\n` +
-          `👤 *Cliente:* ${order.customer.name}\n` +
-          `📞 *Teléfono:* ${order.customer.phone || "—"}\n` +
-          `📍 *Entrega:* ${order.customer.address}${
-            order.customer.city ? `, ${order.customer.city}` : ""
-          }\n` +
-          (order.customer.notes ? `📝 *Notas:* ${order.customer.notes}\n` : "") +
-          `\n🫔 *PRODUCTOS:*\n${itemsList}\n\n` +
-          `💳 *TOTAL PAGADO (STRIPE): ${formatMoney(order.total, order.currency)}*`
-        : `✅ *PAID WEB ORDER — PANKA PRODUCTS*\n\n` +
-          `🧾 *Order:* #${shortId}\n` +
-          `👤 *Customer:* ${order.customer.name}\n` +
-          `📞 *Phone:* ${order.customer.phone || "—"}\n` +
-          `📍 *Delivery:* ${order.customer.address}${
-            order.customer.city ? `, ${order.customer.city}` : ""
-          }\n` +
-          (order.customer.notes ? `📝 *Notes:* ${order.customer.notes}\n` : "") +
-          `\n🫔 *ITEMS:*\n${itemsList}\n\n` +
-          `💳 *TOTAL PAID (STRIPE): ${formatMoney(order.total, order.currency)}*`;
+      `✅ *PAID WEB ORDER — PANKA PRODUCTS*\n\n` +
+      `🧾 *Order:* #${shortId}\n` +
+      `👤 *Customer:* ${order.customer.name}\n` +
+      `📞 *Phone:* ${order.customer.phone || "—"}\n` +
+      `📍 *Delivery Address:* ${order.customer.address}${
+        order.customer.city ? `, ${order.customer.city}` : ""
+      }\n` +
+      (order.customer.notes ? `📝 *Notes:* ${order.customer.notes}\n` : "") +
+      `\n🫔 *ITEMS:*\n${itemsList}\n\n` +
+      `💳 *TOTAL PAID (STRIPE): ${formatMoney(order.total, order.currency)}*`;
 
     return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
-  }, [order, settings.contact.whatsapp, locale]);
+  }, [order, settings.contact.whatsapp]);
 
   return (
     <section className="bg-surface pb-20 pt-14">

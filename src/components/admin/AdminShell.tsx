@@ -75,12 +75,12 @@ function formatCustomerWhatsAppUrl(order: PublicOrder) {
   const shortId = order.id.slice(-8).toUpperCase();
   const itemsSummary = order.items.map((i) => `${i.quantity}x ${i.name}`).join(", ");
   const msg =
-    `¡Hola ${order.customer.name || "Cliente"}! 🫔 Te escribimos de *Panka Products*.\n\n` +
-    `Confirmamos la recepción de tu pedido *#${shortId}* (${itemsSummary}) por *$${order.total.toFixed(2)} USD*.\n` +
-    `Dirección de entrega: ${order.customer.address}${
+    `Hello ${order.customer.name || "there"}! 🫔 We are contacting you from *Panka Products*.\n\n` +
+    `We have received your paid order *#${shortId}* (${itemsSummary}) for *$${order.total.toFixed(2)} USD*.\n` +
+    `Delivery Address: ${order.customer.address}${
       order.customer.city ? `, ${order.customer.city}` : ""
     }.\n\n` +
-    `¡Ya está en nuestra cocina! Te avisaremos cuando salga a reparto.`;
+    `Your order is now confirmed in our kitchen! We will let you know as soon as it is out for delivery.`;
   return `https://wa.me/${digits}?text=${encodeURIComponent(msg)}`;
 }
 

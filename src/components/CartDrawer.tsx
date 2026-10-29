@@ -73,53 +73,29 @@ export default function CartDrawer() {
     : `${selectedStateObj.name} (${selectedStateObj.code}) — Shipping $25.00`;
 
   const whatsappMessage =
-    locale === "es"
-      ? `¡Hola Panka! Quisiera hacer el siguiente pedido:\n\n` +
-        `📦 *PRODUCTOS:*\n` +
-        items
-          .map(
-            (i) =>
-              `• ${i.quantity}x ${i.product.name} — $${(
-                i.product.price * i.quantity
-              ).toFixed(2)}`
-          )
-          .join("\n") +
-        `\n\n📍 *UBICACIÓN DE ENVÍO:*\n` +
-        `• Estado: ${selectedStateObj.name} (${selectedStateObj.code})\n` +
-        (isFlorida ? `• Condado: ${shippingLocation.county}\n` : "") +
-        (shippingLocation.city ? `• Ciudad: ${shippingLocation.city}\n` : "") +
-        (shippingLocation.zip ? `• ZIP Code: ${shippingLocation.zip}\n` : "") +
-        `\n💳 *RESUMEN DE PAGO:*\n` +
-        `• Subtotal: $${totalPrice.toFixed(2)}\n` +
-        `• Envío (Shipping): ${
-          isFreeShipping
-            ? "GRATIS ($0.00 — Miami-Dade / Broward)"
-            : `$${shippingFee.toFixed(2)}`
-        }\n` +
-        `• *TOTAL A PAGAR: $${grandTotal.toFixed(2)}*`
-      : `Hello Panka! I would like to place the following order:\n\n` +
-        `📦 *ITEMS:*\n` +
-        items
-          .map(
-            (i) =>
-              `• ${i.quantity}x ${i.product.name} — $${(
-                i.product.price * i.quantity
-              ).toFixed(2)}`
-          )
-          .join("\n") +
-        `\n\n📍 *SHIPPING LOCATION:*\n` +
-        `• State: ${selectedStateObj.name} (${selectedStateObj.code})\n` +
-        (isFlorida ? `• County: ${shippingLocation.county}\n` : "") +
-        (shippingLocation.city ? `• City: ${shippingLocation.city}\n` : "") +
-        (shippingLocation.zip ? `• ZIP Code: ${shippingLocation.zip}\n` : "") +
-        `\n💳 *ORDER SUMMARY:*\n` +
-        `• Subtotal: $${totalPrice.toFixed(2)}\n` +
-        `• Shipping: ${
-          isFreeShipping
-            ? "FREE ($0.00 — Miami-Dade / Broward)"
-            : `$${shippingFee.toFixed(2)}`
-        }\n` +
-        `• *TOTAL: $${grandTotal.toFixed(2)}*`;
+    `Hello Panka! I would like to place the following order:\n\n` +
+    `📦 *ITEMS:*\n` +
+    items
+      .map(
+        (i) =>
+          `• ${i.quantity}x ${i.product.name} — $${(
+            i.product.price * i.quantity
+          ).toFixed(2)}`
+      )
+      .join("\n") +
+    `\n\n📍 *SHIPPING LOCATION:*\n` +
+    `• State: ${selectedStateObj.name} (${selectedStateObj.code})\n` +
+    (isFlorida ? `• County: ${shippingLocation.county}\n` : "") +
+    (shippingLocation.city ? `• City: ${shippingLocation.city}\n` : "") +
+    (shippingLocation.zip ? `• ZIP Code: ${shippingLocation.zip}\n` : "") +
+    `\n💳 *ORDER SUMMARY:*\n` +
+    `• Subtotal: $${totalPrice.toFixed(2)}\n` +
+    `• Shipping: ${
+      isFreeShipping
+        ? "FREE ($0.00 — Miami-Dade / Broward)"
+        : `$${shippingFee.toFixed(2)}`
+    }\n` +
+    `• *TOTAL: $${grandTotal.toFixed(2)}*`;
 
   return (
     <>
